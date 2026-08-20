@@ -980,6 +980,205 @@
       }
     }
 
+
+    /* =========================
+       NERÓS ADMIN V2
+    ========================= */
+
+    .stats-grid.stats-8 {
+      grid-template-columns: repeat(4, minmax(0,1fr));
+    }
+
+    .stat-card .subvalue {
+      color: #777;
+      font-size: 11px;
+      margin-top: 7px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(330px, .85fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .dashboard-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .dashboard-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border: 1px solid #292929;
+      background: #121212;
+      border-radius: 11px;
+      padding: 11px 12px;
+    }
+
+    .dashboard-item strong {
+      font-size: 13px;
+    }
+
+    .dashboard-item small {
+      display: block;
+      color: #777;
+      margin-top: 4px;
+      font-size: 11px;
+    }
+
+    .dashboard-item .right {
+      text-align: right;
+      white-space: nowrap;
+      color: var(--gold);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .mini-table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+    }
+
+    .mini-table th,
+    .mini-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #252525;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    .mini-table th {
+      color: #888;
+      background: #111;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: .7px;
+    }
+
+    .section-kicker {
+      color: var(--gold);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+
+    .detail-profile {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .profile-box {
+      border: 1px solid #292929;
+      background: #121212;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .profile-box small {
+      display: block;
+      color: #777;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: .6px;
+      margin-bottom: 5px;
+    }
+
+    .profile-box strong {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .quick-stock-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .quick-actions .btn {
+      padding: 10px 12px;
+    }
+
+    .positive {
+      color: #98e3aa !important;
+    }
+
+    .negative {
+      color: #ff9696 !important;
+    }
+
+    .warning-text {
+      color: #f0c873 !important;
+    }
+
+    .sidebar-count {
+      float: right;
+      color: #777;
+      font-size: 10px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    .table-wrap.sticky-first table th:first-child,
+    .table-wrap.sticky-first table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: #151515;
+    }
+
+    .table-wrap.sticky-first table th:first-child {
+      background: #121212;
+      z-index: 3;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-actions .btn {
+      padding: 9px 13px;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1150px) {
+      .stats-grid.stats-8 {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .detail-profile,
+      .quick-stock-row,
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid.stats-8 {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 
@@ -1108,41 +1307,193 @@
       <!-- DASHBOARD -->
       <section id="section-dashboard" class="section active">
 
-        <div class="stats-grid">
+        <div class="stats-grid stats-8">
+
+          <div class="stat-card">
+            <div class="label">Ventas hoy</div>
+            <div class="value" id="statVentasHoy">0</div>
+            <div class="subvalue">Operaciones completadas</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="label">Facturación hoy</div>
+            <div class="value" id="statFacturacionHoy">$0</div>
+            <div class="subvalue">Sin ventas anuladas</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="label">Facturación mes</div>
+            <div class="value" id="statFacturacionMes">$0</div>
+            <div class="subvalue">Mes en curso</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="label">Ganancia mes</div>
+            <div class="value" id="statGananciaMes">$0</div>
+            <div class="subvalue">Venta - costo registrado</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="label">Ticket promedio</div>
+            <div class="value" id="statTicketPromedio">$0</div>
+            <div class="subvalue">Promedio del mes</div>
+          </div>
 
           <div class="stat-card">
             <div class="label">Clientes</div>
             <div class="value" id="statClientes">0</div>
+            <div class="subvalue">Registrados</div>
           </div>
 
           <div class="stat-card">
             <div class="label">Productos</div>
             <div class="value" id="statProductos">0</div>
+            <div class="subvalue">Catálogo total</div>
           </div>
 
           <div class="stat-card">
-            <div class="label">Ventas</div>
-            <div class="value" id="statVentas">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="label">Facturación total</div>
-            <div class="value" id="statFacturacion">$0</div>
+            <div class="label">Stock bajo / sin stock</div>
+            <div class="value" id="statStockBajo">0</div>
+            <div class="subvalue">Requieren revisión</div>
           </div>
 
         </div>
 
-        <div class="panel">
 
-          <div class="panel-header">
-            <h3>Estado del sistema</h3>
+        <div class="dashboard-grid">
+
+          <div>
+
+            <div class="panel">
+
+              <div class="panel-header">
+                <div>
+                  <div class="section-kicker">Actividad</div>
+                  <h3>Últimas ventas</h3>
+                </div>
+
+                <button
+                  class="btn btn-secondary"
+                  type="button"
+                  onclick="irASeccion('ventas')"
+                >
+                  Ver todas
+                </button>
+              </div>
+
+              <div class="table-wrap">
+
+                <table class="mini-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Fecha</th>
+                      <th>Cliente</th>
+                      <th>Pago</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="dashboardUltimasVentas"></tbody>
+                </table>
+
+                <div id="dashboardUltimasVentasEmpty" class="empty hidden">
+                  Todavía no hay ventas completadas.
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <div class="panel-header">
+                <div>
+                  <div class="section-kicker">Ranking</div>
+                  <h3>Productos más vendidos del mes</h3>
+                </div>
+              </div>
+
+              <div id="dashboardTopProductos" class="dashboard-list"></div>
+
+              <div id="dashboardTopProductosEmpty" class="empty hidden">
+                Todavía no hay suficiente información.
+              </div>
+
+            </div>
+
           </div>
 
-          <p style="color:#aaa;line-height:1.7">
-            El sistema ya está conectado a Supabase.
-            Desde acá vas a poder gestionar clientes, productos,
-            ventas, stock e historial.
-          </p>
+
+          <div>
+
+            <div class="panel">
+
+              <div class="panel-header">
+                <div>
+                  <div class="section-kicker">Inventario</div>
+                  <h3>Stock a revisar</h3>
+                </div>
+
+                <button
+                  class="btn btn-secondary"
+                  type="button"
+                  onclick="irAProductosStock()"
+                >
+                  Ir a Productos
+                </button>
+              </div>
+
+              <div id="dashboardStockBajo" class="dashboard-list"></div>
+
+              <div id="dashboardStockBajoEmpty" class="empty hidden">
+                No hay alertas de stock.
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <div class="panel-header">
+                <div>
+                  <div class="section-kicker">Sistema</div>
+                  <h3>Accesos rápidos</h3>
+                </div>
+              </div>
+
+              <div class="quick-actions">
+
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  onclick="irASeccion('nuevaVenta')"
+                >
+                  + Nueva venta
+                </button>
+
+                <button
+                  class="btn btn-secondary"
+                  type="button"
+                  onclick="abrirClienteModal()"
+                >
+                  + Cliente
+                </button>
+
+                <button
+                  class="btn btn-secondary"
+                  type="button"
+                  onclick="abrirProductoModal()"
+                >
+                  + Producto
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
 
         </div>
 
@@ -1794,6 +2145,83 @@
 
   </div>
 
+
+  <!-- MODAL FICHA CLIENTE -->
+  <div id="clienteFichaModal" class="modal-backdrop hidden">
+
+    <div class="modal" style="max-width:1000px">
+
+      <div class="modal-header">
+        <h3 id="clienteFichaTitle">Ficha de cliente</h3>
+        <button class="close-btn" id="cerrarClienteFicha">×</button>
+      </div>
+
+      <div id="clienteFichaContenido"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- MODAL AJUSTAR STOCK -->
+  <div id="stockModal" class="modal-backdrop hidden">
+
+    <div class="modal" style="max-width:520px">
+
+      <div class="modal-header">
+        <h3>Ajustar stock</h3>
+        <button class="close-btn" id="cerrarStockModal">×</button>
+      </div>
+
+      <form id="stockForm">
+
+        <input type="hidden" id="stockProductoId" />
+
+        <div class="form-group">
+          <label>Producto</label>
+          <input id="stockProductoNombre" disabled />
+        </div>
+
+        <div class="quick-stock-row">
+
+          <div class="form-group">
+            <label>Stock actual</label>
+            <input id="stockActual" type="number" disabled />
+          </div>
+
+          <div class="form-group">
+            <label>Nuevo stock</label>
+            <input id="stockNuevo" type="number" step="1" required />
+          </div>
+
+        </div>
+
+        <div class="quick-actions">
+          <button type="button" class="btn btn-secondary" id="stockMenosUno">-1</button>
+          <button type="button" class="btn btn-secondary" id="stockMasUno">+1</button>
+          <button type="button" class="btn btn-secondary" id="stockCero">Poner 0</button>
+        </div>
+
+        <div id="stockMessage" class="message"></div>
+
+        <div class="modal-actions">
+
+          <button type="button" class="btn btn-secondary" id="cancelarStock">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn btn-primary" id="guardarStockBtn">
+            Guardar stock
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
   <script>
 
     /* =========================
@@ -2053,6 +2481,85 @@
     let ventasCache = [];
 
 
+    /* DASHBOARD V2 */
+
+    const dashboardUltimasVentas =
+      document.getElementById("dashboardUltimasVentas");
+
+    const dashboardUltimasVentasEmpty =
+      document.getElementById("dashboardUltimasVentasEmpty");
+
+    const dashboardTopProductos =
+      document.getElementById("dashboardTopProductos");
+
+    const dashboardTopProductosEmpty =
+      document.getElementById("dashboardTopProductosEmpty");
+
+    const dashboardStockBajo =
+      document.getElementById("dashboardStockBajo");
+
+    const dashboardStockBajoEmpty =
+      document.getElementById("dashboardStockBajoEmpty");
+
+
+    /* FICHA CLIENTE */
+
+    const clienteFichaModal =
+      document.getElementById("clienteFichaModal");
+
+    const clienteFichaTitle =
+      document.getElementById("clienteFichaTitle");
+
+    const clienteFichaContenido =
+      document.getElementById("clienteFichaContenido");
+
+    const cerrarClienteFicha =
+      document.getElementById("cerrarClienteFicha");
+
+
+    /* STOCK */
+
+    const stockModal =
+      document.getElementById("stockModal");
+
+    const stockForm =
+      document.getElementById("stockForm");
+
+    const stockProductoId =
+      document.getElementById("stockProductoId");
+
+    const stockProductoNombre =
+      document.getElementById("stockProductoNombre");
+
+    const stockActual =
+      document.getElementById("stockActual");
+
+    const stockNuevo =
+      document.getElementById("stockNuevo");
+
+    const stockMessage =
+      document.getElementById("stockMessage");
+
+    const cerrarStockModal =
+      document.getElementById("cerrarStockModal");
+
+    const cancelarStock =
+      document.getElementById("cancelarStock");
+
+    const guardarStockBtn =
+      document.getElementById("guardarStockBtn");
+
+    const stockMenosUno =
+      document.getElementById("stockMenosUno");
+
+    const stockMasUno =
+      document.getElementById("stockMasUno");
+
+    const stockCero =
+      document.getElementById("stockCero");
+
+
+
 
 
 
@@ -2308,10 +2815,27 @@
 
     async function cargarDashboard() {
 
+      const ahora = new Date();
+
+      const inicioHoy =
+        new Date(
+          ahora.getFullYear(),
+          ahora.getMonth(),
+          ahora.getDate()
+        );
+
+      const inicioMes =
+        new Date(
+          ahora.getFullYear(),
+          ahora.getMonth(),
+          1
+        );
+
+
       const [
         clientesResult,
         productosResult,
-        ventasResult
+        ventasMesResult
       ] = await Promise.all([
 
         supabaseClient
@@ -2323,16 +2847,115 @@
 
         supabaseClient
           .from("productos")
-          .select("*", {
-            count: "exact",
-            head: true
-          }),
+          .select("id,nombre,codigo,stock,stock_minimo,activo"),
 
         supabaseClient
           .from("ventas")
-          .select("total")
+          .select(`
+            id,
+            created_at,
+            cliente_id,
+            subtotal,
+            descuento,
+            total,
+            medio_pago,
+            estado,
+            cliente:clientes (
+              id,
+              nombre,
+              apellido
+            )
+          `)
+          .gte(
+            "created_at",
+            inicioMes.toISOString()
+          )
+          .order(
+            "created_at",
+            { ascending: false }
+          )
 
       ]);
+
+
+      const productos =
+        productosResult.data || [];
+
+      const ventasMes =
+        (ventasMesResult.data || [])
+          .filter(
+            v => v.estado !== "anulada"
+          );
+
+
+      const ventasHoy =
+        ventasMes.filter(
+          v =>
+            new Date(v.created_at) >= inicioHoy
+        );
+
+
+      const facturacionHoy =
+        ventasHoy.reduce(
+          (acc, v) =>
+            acc + Number(v.total || 0),
+          0
+        );
+
+
+      const facturacionMes =
+        ventasMes.reduce(
+          (acc, v) =>
+            acc + Number(v.total || 0),
+          0
+        );
+
+
+      const ticketPromedio =
+        ventasMes.length
+          ? facturacionMes / ventasMes.length
+          : 0;
+
+
+      const productosStockBajo =
+        productos.filter(p => {
+
+          if (p.activo === false) {
+            return false;
+          }
+
+          const stock =
+            Number(p.stock || 0);
+
+          const minimo =
+            Number(p.stock_minimo || 0);
+
+          return stock <= minimo;
+        });
+
+
+      document.getElementById(
+        "statVentasHoy"
+      ).textContent =
+        ventasHoy.length;
+
+
+      document.getElementById(
+        "statFacturacionHoy"
+      ).textContent =
+        formatoDinero(facturacionHoy);
+
+
+      document.getElementById(
+        "statFacturacionMes"
+      ).textContent =
+        formatoDinero(facturacionMes);
+
+
+      document.getElementById(
+        "statTicketPromedio"
+      ).textContent =
+        formatoDinero(ticketPromedio);
 
 
       document.getElementById(
@@ -2344,32 +2967,260 @@
       document.getElementById(
         "statProductos"
       ).textContent =
-        productosResult.count || 0;
-
-
-      const ventas =
-        ventasResult.data || [];
+        productos.length;
 
 
       document.getElementById(
-        "statVentas"
+        "statStockBajo"
       ).textContent =
-        ventas.length;
+        productosStockBajo.length;
 
 
-      const totalFacturado =
-        ventas.reduce(
-          (acc, venta) =>
-            acc + Number(venta.total || 0),
+      /*
+        Ganancia aproximada del mes:
+        total de ventas completadas - costo histórico de detalle_ventas.
+      */
+      let costoMes = 0;
+      let detallesMes = [];
+
+      const idsVentasMes =
+        ventasMes.map(v => v.id);
+
+
+      if (idsVentasMes.length) {
+
+        for (
+          let i = 0;
+          i < idsVentasMes.length;
+          i += 300
+        ) {
+
+          const lote =
+            idsVentasMes.slice(i, i + 300);
+
+          const { data, error } =
+            await supabaseClient
+              .from("detalle_ventas")
+              .select(`
+                venta_id,
+                producto_id,
+                cantidad,
+                costo_unitario,
+                subtotal,
+                producto:productos (
+                  id,
+                  nombre,
+                  codigo
+                )
+              `)
+              .in("venta_id", lote);
+
+          if (!error && data) {
+            detallesMes =
+              detallesMes.concat(data);
+          }
+        }
+      }
+
+
+      costoMes =
+        detallesMes.reduce(
+          (acc, d) =>
+            acc +
+            Number(d.cantidad || 0) *
+            Number(d.costo_unitario || 0),
           0
         );
 
 
-      document.getElementById(
-        "statFacturacion"
-      ).textContent =
-        formatoDinero(totalFacturado);
+      const gananciaMes =
+        facturacionMes - costoMes;
 
+
+      document.getElementById(
+        "statGananciaMes"
+      ).textContent =
+        formatoDinero(gananciaMes);
+
+
+      /*
+        Últimas 6 ventas.
+      */
+      const ultimas =
+        ventasMes.slice(0, 6);
+
+      dashboardUltimasVentas.innerHTML = "";
+
+      dashboardUltimasVentasEmpty.classList.toggle(
+        "hidden",
+        ultimas.length !== 0
+      );
+
+
+      ultimas.forEach(v => {
+
+        const tr =
+          document.createElement("tr");
+
+        const cliente =
+          v.cliente
+            ? `${v.cliente.nombre || ""} ${v.cliente.apellido || ""}`.trim()
+            : "Consumidor final";
+
+        tr.innerHTML = `
+          <td><strong>#${v.id}</strong></td>
+          <td>${formatoFechaHora(v.created_at)}</td>
+          <td>${escapeHtml(cliente || "Cliente")}</td>
+          <td>${escapeHtml(v.medio_pago || "—")}</td>
+          <td><strong>${formatoDinero(v.total)}</strong></td>
+        `;
+
+        dashboardUltimasVentas.appendChild(tr);
+      });
+
+
+      /*
+        Ranking de productos del mes.
+      */
+      const ranking = new Map();
+
+      detallesMes.forEach(d => {
+
+        const key =
+          d.producto_id || "sin-producto";
+
+        if (!ranking.has(key)) {
+
+          ranking.set(
+            key,
+            {
+              nombre:
+                d.producto?.nombre ||
+                "Producto no disponible",
+
+              codigo:
+                d.producto?.codigo || "",
+
+              cantidad: 0,
+
+              facturado: 0
+            }
+          );
+        }
+
+        const item =
+          ranking.get(key);
+
+        item.cantidad +=
+          Number(d.cantidad || 0);
+
+        item.facturado +=
+          Number(d.subtotal || 0);
+      });
+
+
+      const topProductos =
+        [...ranking.values()]
+          .sort(
+            (a, b) =>
+              b.cantidad - a.cantidad
+          )
+          .slice(0, 6);
+
+
+      dashboardTopProductos.innerHTML = "";
+
+      dashboardTopProductosEmpty.classList.toggle(
+        "hidden",
+        topProductos.length !== 0
+      );
+
+
+      topProductos.forEach(
+        (item, index) => {
+
+          const div =
+            document.createElement("div");
+
+          div.className =
+            "dashboard-item";
+
+          div.innerHTML = `
+            <div>
+              <strong>
+                ${index + 1}. ${escapeHtml(item.nombre)}
+              </strong>
+              <small>
+                ${escapeHtml(item.codigo || "")}
+                · ${item.cantidad} unidad${item.cantidad === 1 ? "" : "es"}
+              </small>
+            </div>
+
+            <div class="right">
+              ${formatoDinero(item.facturado)}
+            </div>
+          `;
+
+          dashboardTopProductos.appendChild(div);
+        }
+      );
+
+
+      /*
+        Alertas de stock: primero los negativos/cero.
+      */
+      const alertas =
+        productosStockBajo
+          .sort((a, b) => {
+
+            const sa = Number(a.stock || 0);
+            const sb = Number(b.stock || 0);
+
+            if (sa !== sb) {
+              return sa - sb;
+            }
+
+            return String(a.nombre || "")
+              .localeCompare(
+                String(b.nombre || ""),
+                "es"
+              );
+          })
+          .slice(0, 8);
+
+
+      dashboardStockBajo.innerHTML = "";
+
+      dashboardStockBajoEmpty.classList.toggle(
+        "hidden",
+        alertas.length !== 0
+      );
+
+
+      alertas.forEach(p => {
+
+        const stock =
+          Number(p.stock || 0);
+
+        const div =
+          document.createElement("div");
+
+        div.className =
+          "dashboard-item";
+
+        div.innerHTML = `
+          <div>
+            <strong>${escapeHtml(p.nombre || "Producto")}</strong>
+            <small>${escapeHtml(p.codigo || "")}</small>
+          </div>
+
+          <div class="right ${stock <= 0 ? "negative" : "warning-text"}">
+            Stock ${stock}
+          </div>
+        `;
+
+        dashboardStockBajo.appendChild(div);
+      });
     }
 
 
@@ -2477,6 +3328,15 @@
           <td>
 
             <div class="actions">
+
+              <button
+                class="icon-btn"
+                onclick="verFichaCliente(
+                  ${cliente.id}
+                )"
+              >
+                Ver ficha
+              </button>
 
               <button
                 class="icon-btn"
@@ -2690,6 +3550,250 @@
       clienteForm.reset();
 
     }
+
+
+
+    cerrarClienteFicha.addEventListener(
+      "click",
+      () =>
+        clienteFichaModal.classList.add("hidden")
+    );
+
+
+    clienteFichaModal.addEventListener(
+      "click",
+      event => {
+
+        if (event.target === clienteFichaModal) {
+          clienteFichaModal.classList.add("hidden");
+        }
+      }
+    );
+
+
+    window.verFichaCliente =
+      async function(id) {
+
+        const cliente =
+          clientesCache.find(
+            c => c.id === id
+          );
+
+        if (!cliente) {
+          return;
+        }
+
+        const nombre =
+          `${cliente.nombre || ""} ${cliente.apellido || ""}`.trim();
+
+        clienteFichaTitle.textContent =
+          nombre || `Cliente #${id}`;
+
+        clienteFichaContenido.innerHTML = `
+          <div class="loading">
+            Cargando historial...
+          </div>
+        `;
+
+        clienteFichaModal.classList.remove("hidden");
+
+
+        const { data: ventas, error } =
+          await supabaseClient
+            .from("ventas")
+            .select(`
+              id,
+              created_at,
+              total,
+              medio_pago,
+              estado
+            `)
+            .eq("cliente_id", id)
+            .order(
+              "created_at",
+              { ascending: false }
+            );
+
+
+        if (error) {
+
+          console.error(error);
+
+          clienteFichaContenido.innerHTML = `
+            <div class="message error" style="display:block">
+              No se pudo cargar el historial.
+            </div>
+          `;
+
+          return;
+        }
+
+
+        const completadas =
+          (ventas || []).filter(
+            v => v.estado !== "anulada"
+          );
+
+
+        const totalGastado =
+          completadas.reduce(
+            (acc, v) =>
+              acc + Number(v.total || 0),
+            0
+          );
+
+
+        const ultimaCompra =
+          completadas.length
+            ? formatoFechaHora(
+                completadas[0].created_at
+              )
+            : "Sin compras";
+
+
+        const filas =
+          (ventas || [])
+            .slice(0, 20)
+            .map(v => `
+              <tr>
+                <td><strong>#${v.id}</strong></td>
+                <td>${formatoFechaHora(v.created_at)}</td>
+                <td>${escapeHtml(v.medio_pago || "—")}</td>
+                <td>${formatoDinero(v.total)}</td>
+                <td>
+                  <span class="sale-status-badge ${estadoVentaClase(v.estado)}">
+                    ${escapeHtml(v.estado || "—")}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    class="icon-btn"
+                    type="button"
+                    onclick="abrirVentaDesdeFicha(${v.id})"
+                  >
+                    Ver
+                  </button>
+                </td>
+              </tr>
+            `)
+            .join("");
+
+
+        clienteFichaContenido.innerHTML = `
+
+          <div class="detail-profile">
+
+            <div class="profile-box">
+              <small>Teléfono</small>
+              <strong>${escapeHtml(cliente.telefono || "—")}</strong>
+            </div>
+
+            <div class="profile-box">
+              <small>DNI / CUIT</small>
+              <strong>${escapeHtml(cliente.dni || "—")}</strong>
+            </div>
+
+            <div class="profile-box">
+              <small>Email</small>
+              <strong>${escapeHtml(cliente.email || "—")}</strong>
+            </div>
+
+            <div class="profile-box">
+              <small>Compras completadas</small>
+              <strong>${completadas.length}</strong>
+            </div>
+
+            <div class="profile-box">
+              <small>Total gastado</small>
+              <strong class="positive">${formatoDinero(totalGastado)}</strong>
+            </div>
+
+            <div class="profile-box">
+              <small>Última compra</small>
+              <strong>${escapeHtml(ultimaCompra)}</strong>
+            </div>
+
+          </div>
+
+
+          ${
+            cliente.notas
+              ? `
+                <div class="profile-box" style="margin-bottom:18px">
+                  <small>Notas del cliente</small>
+                  <strong>${escapeHtml(cliente.notas)}</strong>
+                </div>
+              `
+              : ""
+          }
+
+
+          <div class="panel-header">
+            <h3>Historial de compras</h3>
+          </div>
+
+          <div class="table-wrap">
+
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Fecha</th>
+                  <th>Pago</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+
+              <tbody>
+                ${
+                  filas ||
+                  `
+                    <tr>
+                      <td colspan="6" style="text-align:center;color:#777">
+                        Este cliente todavía no tiene compras.
+                      </td>
+                    </tr>
+                  `
+                }
+              </tbody>
+            </table>
+
+          </div>
+
+          <div class="sale-actions-bottom">
+            <button
+              class="btn btn-secondary"
+              type="button"
+              onclick="editarClienteDesdeFicha(${cliente.id})"
+            >
+              Editar cliente
+            </button>
+          </div>
+        `;
+      };
+
+
+    window.abrirVentaDesdeFicha =
+      async function(id) {
+
+        clienteFichaModal.classList.add("hidden");
+
+        if (!ventasCache.some(v => v.id === id)) {
+          await cargarVentas();
+        }
+
+        await window.verDetalleVenta(id);
+      };
+
+
+    window.editarClienteDesdeFicha =
+      function(id) {
+
+        clienteFichaModal.classList.add("hidden");
+        window.editarCliente(id);
+      };
 
 
     window.editarCliente =
@@ -3143,6 +4247,13 @@
 
               <button
                 class="icon-btn"
+                onclick="ajustarStockProducto(${producto.id})"
+              >
+                Stock
+              </button>
+
+              <button
+                class="icon-btn"
                 onclick="editarProducto(${producto.id})"
               >
                 Editar
@@ -3281,6 +4392,176 @@
       productoModal.classList.add("hidden");
       productoForm.reset();
     }
+
+
+
+    function cerrarModalStock() {
+
+      stockModal.classList.add("hidden");
+      stockForm.reset();
+      limpiarMensaje(stockMessage);
+    }
+
+
+    cerrarStockModal.addEventListener(
+      "click",
+      cerrarModalStock
+    );
+
+
+    cancelarStock.addEventListener(
+      "click",
+      cerrarModalStock
+    );
+
+
+    stockModal.addEventListener(
+      "click",
+      event => {
+
+        if (event.target === stockModal) {
+          cerrarModalStock();
+        }
+      }
+    );
+
+
+    window.ajustarStockProducto =
+      function(id) {
+
+        const producto =
+          productosCache.find(
+            p => p.id === id
+          );
+
+        if (!producto) {
+          return;
+        }
+
+        limpiarMensaje(stockMessage);
+
+        stockProductoId.value =
+          producto.id;
+
+        stockProductoNombre.value =
+          producto.nombre || "";
+
+        stockActual.value =
+          Number(producto.stock || 0);
+
+        stockNuevo.value =
+          Number(producto.stock || 0);
+
+        stockModal.classList.remove("hidden");
+      };
+
+
+    stockMenosUno.addEventListener(
+      "click",
+      () => {
+
+        stockNuevo.value =
+          Number(stockNuevo.value || 0) - 1;
+      }
+    );
+
+
+    stockMasUno.addEventListener(
+      "click",
+      () => {
+
+        stockNuevo.value =
+          Number(stockNuevo.value || 0) + 1;
+      }
+    );
+
+
+    stockCero.addEventListener(
+      "click",
+      () => {
+
+        stockNuevo.value = 0;
+      }
+    );
+
+
+    stockForm.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        limpiarMensaje(stockMessage);
+
+        const id =
+          Number(stockProductoId.value);
+
+        const nuevo =
+          Math.trunc(
+            Number(stockNuevo.value || 0)
+          );
+
+        if (!Number.isFinite(nuevo)) {
+
+          mostrarMensaje(
+            stockMessage,
+            "Ingresá un stock válido.",
+            "error"
+          );
+
+          return;
+        }
+
+        guardarStockBtn.disabled = true;
+        guardarStockBtn.textContent =
+          "Guardando...";
+
+
+        const { error } =
+          await supabaseClient
+            .from("productos")
+            .update({
+              stock: nuevo
+            })
+            .eq("id", id);
+
+
+        guardarStockBtn.disabled = false;
+        guardarStockBtn.textContent =
+          "Guardar stock";
+
+
+        if (error) {
+
+          console.error(error);
+
+          mostrarMensaje(
+            stockMessage,
+            "No se pudo actualizar el stock.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        mostrarMensaje(
+          stockMessage,
+          "Stock actualizado correctamente.",
+          "success"
+        );
+
+
+        await cargarProductos();
+        await cargarDashboard();
+
+
+        setTimeout(
+          cerrarModalStock,
+          450
+        );
+      }
+    );
 
 
     window.editarProducto =
@@ -4277,6 +5558,7 @@
       await cargarProductos();
       await cargarDashboard();
       await cargarClientes();
+      await cargarVentas();
 
       renderVentaClienteSeleccionado();
       renderVentaCarrito();
@@ -4967,6 +6249,38 @@
         alert(
           `Venta #${id} anulada correctamente.`
         );
+      };
+
+
+
+
+    /* =========================
+       NAVEGACIÓN RÁPIDA
+    ========================= */
+
+    window.irASeccion =
+      async function(section) {
+
+        const btn =
+          [...navButtons].find(
+            b => b.dataset.section === section
+          );
+
+        if (btn) {
+          btn.click();
+        }
+      };
+
+
+    window.irAProductosStock =
+      async function() {
+
+        await window.irASeccion("productos");
+
+        filtroStockProducto.value =
+          "bajo";
+
+        aplicarFiltrosProductos();
       };
 
 
