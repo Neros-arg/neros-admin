@@ -566,6 +566,85 @@
         flex-direction: column;
       }
     }
+
+    /* PRODUCTOS */
+    .product-filters {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 190px 190px auto;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .products-summary {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 0 0 12px;
+    }
+
+    .stock-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 12px;
+      border: 1px solid #333;
+      background: #1b1b1b;
+    }
+
+    .stock-badge.ok {
+      color: #9be2ad;
+      border-color: rgba(100,193,124,.35);
+      background: rgba(100,193,124,.10);
+    }
+
+    .stock-badge.low {
+      color: #f0c873;
+      border-color: rgba(214,170,89,.35);
+      background: rgba(214,170,89,.10);
+    }
+
+    .stock-badge.out {
+      color: #ff9696;
+      border-color: rgba(212,91,91,.35);
+      background: rgba(212,91,91,.10);
+    }
+
+    .product-name {
+      min-width: 260px;
+      max-width: 420px;
+      white-space: normal;
+      line-height: 1.35;
+    }
+
+    .product-code {
+      color: #aaa;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .product-table table {
+      min-width: 1500px;
+    }
+
+    .muted-cell {
+      color: #777;
+    }
+
+    @media (max-width: 900px) {
+      .product-filters {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .product-filters {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 
@@ -790,15 +869,64 @@
       <!-- PRODUCTOS -->
       <section id="section-productos" class="section">
 
-        <div class="panel">
+        <div class="product-filters">
 
-          <div class="panel-header">
-            <h3>Productos</h3>
+          <input
+            id="buscarProducto"
+            type="text"
+            placeholder="Buscar por nombre, marca, código o presentación..."
+          />
+
+          <select id="filtroStockProducto">
+            <option value="todos">Todo el stock</option>
+            <option value="con-stock">Con stock</option>
+            <option value="bajo">Stock bajo</option>
+            <option value="sin-stock">Sin stock</option>
+          </select>
+
+          <select id="filtroActivoProducto">
+            <option value="todos">Todos</option>
+            <option value="activos">Activos</option>
+            <option value="inactivos">Inactivos</option>
+          </select>
+
+          <button class="btn btn-primary" id="nuevoProductoBtn">
+            + Nuevo producto
+          </button>
+
+        </div>
+
+        <div id="productosLoading" class="loading hidden">
+          Cargando productos...
+        </div>
+
+        <div id="productosSummary" class="products-summary"></div>
+
+        <div class="table-wrap product-table">
+
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Presentación</th>
+                <th>Costo USD</th>
+                <th>Camionero</th>
+                <th>Precio</th>
+                <th>Efectivo</th>
+                <th>Mayor. 10</th>
+                <th>Mayor. 20</th>
+                <th>Mayor. 30</th>
+                <th>Stock</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="productosBody"></tbody>
+          </table>
+
+          <div id="productosEmpty" class="empty hidden">
+            No se encontraron productos.
           </div>
-
-          <p style="color:#888">
-            En el próximo paso conectamos productos, precios y stock.
-          </p>
 
         </div>
 
@@ -950,6 +1078,131 @@
   </div>
 
 
+
+  <!-- MODAL PRODUCTO -->
+  <div id="productoModal" class="modal-backdrop hidden">
+
+    <div class="modal">
+
+      <div class="modal-header">
+        <h3 id="productoModalTitle">Nuevo producto</h3>
+        <button class="close-btn" id="cerrarProductoModal">×</button>
+      </div>
+
+      <form id="productoForm">
+
+        <input type="hidden" id="productoId" />
+
+        <div class="form-grid">
+
+          <div>
+            <label>Marca</label>
+            <input id="productoMarca" />
+          </div>
+
+          <div>
+            <label>Código</label>
+            <input id="productoCodigo" placeholder="NER-000001" />
+          </div>
+
+          <div class="full">
+            <label>Nombre *</label>
+            <input id="productoNombre" required />
+          </div>
+
+          <div>
+            <label>Categoría</label>
+            <input id="productoCategoria" />
+          </div>
+
+          <div>
+            <label>Presentación</label>
+            <input id="productoPresentacion" placeholder="100ML" />
+          </div>
+
+          <div>
+            <label>Costo USD</label>
+            <input id="productoCosto" type="number" step="0.01" min="0" />
+          </div>
+
+          <div>
+            <label>Costo camionero</label>
+            <input id="productoCostoCamionero" type="number" step="0.01" min="0" />
+          </div>
+
+          <div>
+            <label>Precio lista</label>
+            <input id="productoPrecio" type="number" step="0.01" min="0" />
+          </div>
+
+          <div>
+            <label>Precio efectivo</label>
+            <input id="productoPrecioEfectivo" type="number" step="0.01" min="0" />
+          </div>
+
+          <div>
+            <label>Mayorista 10</label>
+            <input id="productoMayorista10" type="number" step="0.01" min="0" />
+          </div>
+
+          <div>
+            <label>Mayorista 20</label>
+            <input id="productoMayorista20" type="number" step="0.01" min="0" />
+          </div>
+
+          <div>
+            <label>Mayorista 30</label>
+            <input id="productoMayorista30" type="number" step="0.01" min="0" />
+          </div>
+
+          <div>
+            <label>Stock</label>
+            <input id="productoStock" type="number" step="1" min="0" value="0" />
+          </div>
+
+          <div>
+            <label>Stock mínimo</label>
+            <input id="productoStockMinimo" type="number" step="1" min="0" value="1" />
+          </div>
+
+          <div>
+            <label>Estado</label>
+            <select id="productoActivo">
+              <option value="true">Activo</option>
+              <option value="false">Inactivo</option>
+            </select>
+          </div>
+
+          <div class="full">
+            <label>URL de imagen</label>
+            <input id="productoImagenUrl" type="url" placeholder="https://..." />
+          </div>
+
+          <div class="full">
+            <label>Notas</label>
+            <textarea id="productoNotas"></textarea>
+          </div>
+
+        </div>
+
+        <div id="productoMessage" class="message"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelarProducto">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn btn-primary" id="guardarProductoBtn">
+            Guardar producto
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
   <script>
 
     /* =========================
@@ -1053,6 +1306,57 @@
 
 
     let clientesCache = [];
+
+
+    /* PRODUCTOS */
+
+    const productosBody =
+      document.getElementById("productosBody");
+
+    const productosEmpty =
+      document.getElementById("productosEmpty");
+
+    const productosLoading =
+      document.getElementById("productosLoading");
+
+    const productosSummary =
+      document.getElementById("productosSummary");
+
+    const buscarProducto =
+      document.getElementById("buscarProducto");
+
+    const filtroStockProducto =
+      document.getElementById("filtroStockProducto");
+
+    const filtroActivoProducto =
+      document.getElementById("filtroActivoProducto");
+
+    const nuevoProductoBtn =
+      document.getElementById("nuevoProductoBtn");
+
+    const productoModal =
+      document.getElementById("productoModal");
+
+    const cerrarProductoModal =
+      document.getElementById("cerrarProductoModal");
+
+    const cancelarProducto =
+      document.getElementById("cancelarProducto");
+
+    const productoForm =
+      document.getElementById("productoForm");
+
+    const productoModalTitle =
+      document.getElementById("productoModalTitle");
+
+    const productoMessage =
+      document.getElementById("productoMessage");
+
+    const guardarProductoBtn =
+      document.getElementById("guardarProductoBtn");
+
+    let productosCache = [];
+
 
 
     /* =========================
@@ -1198,6 +1502,7 @@
 
       await cargarDashboard();
       await cargarClientes();
+      await cargarProductos();
 
     }
 
@@ -1279,6 +1584,10 @@
 
           if (section === "clientes") {
             await cargarClientes();
+          }
+
+          if (section === "productos") {
+            await cargarProductos();
           }
 
         }
@@ -1899,6 +2208,571 @@
         .replaceAll("'", "&#039;");
 
     }
+
+
+
+    /* =========================
+       PRODUCTOS
+    ========================= */
+
+    async function cargarProductos() {
+
+      productosLoading.classList.remove("hidden");
+
+      /*
+        Supabase suele limitar cada respuesta a 1000 filas.
+        Como el catálogo tiene más de 1000 productos, los traemos por bloques.
+      */
+      const pageSize = 1000;
+      let desde = 0;
+      let todos = [];
+      let seguir = true;
+
+      while (seguir) {
+
+        const { data, error } =
+          await supabaseClient
+            .from("productos")
+            .select("*")
+            .order("nombre", { ascending: true })
+            .range(desde, desde + pageSize - 1);
+
+        if (error) {
+          productosLoading.classList.add("hidden");
+          console.error(error);
+          alert("No se pudieron cargar los productos.");
+          return;
+        }
+
+        const bloque = data || [];
+        todos = todos.concat(bloque);
+
+        if (bloque.length < pageSize) {
+          seguir = false;
+        } else {
+          desde += pageSize;
+        }
+      }
+
+      productosLoading.classList.add("hidden");
+
+      productosCache = todos;
+      aplicarFiltrosProductos();
+    }
+
+
+    function numeroProducto(valor) {
+      const n = Number(valor);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+
+    function dineroProducto(valor) {
+      return formatoDinero(numeroProducto(valor));
+    }
+
+
+    function aplicarFiltrosProductos() {
+
+      const q =
+        (buscarProducto.value || "")
+          .toLowerCase()
+          .trim();
+
+      const filtroStock =
+        filtroStockProducto.value;
+
+      const filtroActivo =
+        filtroActivoProducto.value;
+
+      const filtrados =
+        productosCache.filter(p => {
+
+          const texto = `
+            ${p.marca || ""}
+            ${p.nombre || ""}
+            ${p.codigo || ""}
+            ${p.categoria || ""}
+            ${p.presentacion || ""}
+          `.toLowerCase();
+
+          if (q && !texto.includes(q)) {
+            return false;
+          }
+
+          const stock = numeroProducto(p.stock);
+          const minimo = numeroProducto(p.stock_minimo);
+
+          if (
+            filtroStock === "con-stock" &&
+            stock <= 0
+          ) return false;
+
+          if (
+            filtroStock === "sin-stock" &&
+            stock > 0
+          ) return false;
+
+          if (
+            filtroStock === "bajo" &&
+            !(stock > 0 && stock <= minimo)
+          ) return false;
+
+          if (
+            filtroActivo === "activos" &&
+            p.activo === false
+          ) return false;
+
+          if (
+            filtroActivo === "inactivos" &&
+            p.activo !== false
+          ) return false;
+
+          return true;
+        });
+
+      renderProductos(filtrados);
+    }
+
+
+    function renderProductos(productos) {
+
+      productosBody.innerHTML = "";
+
+      productosEmpty.classList.toggle(
+        "hidden",
+        productos.length !== 0
+      );
+
+      productosSummary.textContent =
+        `${productos.length.toLocaleString("es-AR")} de ` +
+        `${productosCache.length.toLocaleString("es-AR")} productos`;
+
+      productos.forEach(producto => {
+
+        const stock =
+          numeroProducto(producto.stock);
+
+        const minimo =
+          numeroProducto(producto.stock_minimo);
+
+        let stockClass = "ok";
+
+        if (stock <= 0) {
+          stockClass = "out";
+        } else if (stock <= minimo) {
+          stockClass = "low";
+        }
+
+        const tr =
+          document.createElement("tr");
+
+        tr.innerHTML = `
+
+          <td>
+            <span class="product-code">
+              ${escapeHtml(producto.codigo || "—")}
+            </span>
+          </td>
+
+          <td class="product-name">
+            <strong>
+              ${escapeHtml(producto.nombre || "Sin nombre")}
+            </strong>
+            ${
+              producto.marca
+                ? `<div class="muted-cell" style="margin-top:4px">
+                    ${escapeHtml(producto.marca)}
+                   </div>`
+                : ""
+            }
+          </td>
+
+          <td>
+            ${escapeHtml(producto.presentacion || "—")}
+          </td>
+
+          <td>
+            ${numeroProducto(producto.costo).toLocaleString(
+              "es-AR",
+              { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+            )}
+          </td>
+
+          <td>
+            ${numeroProducto(producto.costo_camionero).toLocaleString(
+              "es-AR",
+              { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+            )}
+          </td>
+
+          <td>
+            ${dineroProducto(producto.precio)}
+          </td>
+
+          <td>
+            ${dineroProducto(producto.precio_efectivo)}
+          </td>
+
+          <td>
+            ${dineroProducto(producto.precio_mayorista_10)}
+          </td>
+
+          <td>
+            ${dineroProducto(producto.precio_mayorista_20)}
+          </td>
+
+          <td>
+            ${dineroProducto(producto.precio_mayorista_30)}
+          </td>
+
+          <td>
+            <span class="stock-badge ${stockClass}">
+              ${stock}
+            </span>
+          </td>
+
+          <td>
+            <div class="actions">
+
+              <button
+                class="icon-btn"
+                onclick="editarProducto(${producto.id})"
+              >
+                Editar
+              </button>
+
+              <button
+                class="icon-btn"
+                onclick="eliminarProducto(${producto.id})"
+              >
+                Eliminar
+              </button>
+
+            </div>
+          </td>
+        `;
+
+        productosBody.appendChild(tr);
+      });
+    }
+
+
+    buscarProducto.addEventListener(
+      "input",
+      aplicarFiltrosProductos
+    );
+
+    filtroStockProducto.addEventListener(
+      "change",
+      aplicarFiltrosProductos
+    );
+
+    filtroActivoProducto.addEventListener(
+      "change",
+      aplicarFiltrosProductos
+    );
+
+    nuevoProductoBtn.addEventListener(
+      "click",
+      () => abrirProductoModal()
+    );
+
+    cerrarProductoModal.addEventListener(
+      "click",
+      cerrarModalProducto
+    );
+
+    cancelarProducto.addEventListener(
+      "click",
+      cerrarModalProducto
+    );
+
+    productoModal.addEventListener(
+      "click",
+      event => {
+        if (event.target === productoModal) {
+          cerrarModalProducto();
+        }
+      }
+    );
+
+
+    function abrirProductoModal(producto = null) {
+
+      productoForm.reset();
+      limpiarMensaje(productoMessage);
+
+      document.getElementById("productoId").value =
+        producto?.id || "";
+
+      document.getElementById("productoMarca").value =
+        producto?.marca || "";
+
+      document.getElementById("productoCodigo").value =
+        producto?.codigo || "";
+
+      document.getElementById("productoNombre").value =
+        producto?.nombre || "";
+
+      document.getElementById("productoCategoria").value =
+        producto?.categoria || "";
+
+      document.getElementById("productoPresentacion").value =
+        producto?.presentacion || "";
+
+      document.getElementById("productoCosto").value =
+        producto?.costo ?? 0;
+
+      document.getElementById("productoCostoCamionero").value =
+        producto?.costo_camionero ?? 0;
+
+      document.getElementById("productoPrecio").value =
+        producto?.precio ?? 0;
+
+      document.getElementById("productoPrecioEfectivo").value =
+        producto?.precio_efectivo ?? 0;
+
+      document.getElementById("productoMayorista10").value =
+        producto?.precio_mayorista_10 ?? 0;
+
+      document.getElementById("productoMayorista20").value =
+        producto?.precio_mayorista_20 ?? 0;
+
+      document.getElementById("productoMayorista30").value =
+        producto?.precio_mayorista_30 ?? 0;
+
+      document.getElementById("productoStock").value =
+        producto?.stock ?? 0;
+
+      document.getElementById("productoStockMinimo").value =
+        producto?.stock_minimo ?? 1;
+
+      document.getElementById("productoActivo").value =
+        producto?.activo === false ? "false" : "true";
+
+      document.getElementById("productoImagenUrl").value =
+        producto?.imagen_url || "";
+
+      document.getElementById("productoNotas").value =
+        producto?.notas || "";
+
+      productoModalTitle.textContent =
+        producto
+          ? "Editar producto"
+          : "Nuevo producto";
+
+      guardarProductoBtn.textContent =
+        producto
+          ? "Guardar cambios"
+          : "Guardar producto";
+
+      productoModal.classList.remove("hidden");
+    }
+
+
+    function cerrarModalProducto() {
+      productoModal.classList.add("hidden");
+      productoForm.reset();
+    }
+
+
+    window.editarProducto =
+      function(id) {
+
+        const producto =
+          productosCache.find(
+            p => p.id === id
+          );
+
+        if (!producto) return;
+
+        abrirProductoModal(producto);
+      };
+
+
+    window.eliminarProducto =
+      async function(id) {
+
+        const producto =
+          productosCache.find(
+            p => p.id === id
+          );
+
+        if (!producto) return;
+
+        const confirmar =
+          confirm(
+            `¿Eliminar "${producto.nombre || "este producto"}"?`
+          );
+
+        if (!confirmar) return;
+
+        const { error } =
+          await supabaseClient
+            .from("productos")
+            .delete()
+            .eq("id", id);
+
+        if (error) {
+          console.error(error);
+          alert(
+            "No se pudo eliminar el producto. " +
+            "Si ya tiene ventas asociadas, conviene dejarlo inactivo."
+          );
+          return;
+        }
+
+        await cargarProductos();
+        await cargarDashboard();
+      };
+
+
+    productoForm.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+        limpiarMensaje(productoMessage);
+
+        guardarProductoBtn.disabled = true;
+        guardarProductoBtn.textContent = "Guardando...";
+
+        const id =
+          document.getElementById("productoId").value;
+
+        const num = idElemento => {
+          const valor =
+            document.getElementById(idElemento).value;
+
+          return valor === ""
+            ? 0
+            : Number(valor);
+        };
+
+        const datos = {
+
+          marca:
+            document.getElementById("productoMarca")
+              .value.trim() || null,
+
+          codigo:
+            document.getElementById("productoCodigo")
+              .value.trim() || null,
+
+          nombre:
+            document.getElementById("productoNombre")
+              .value.trim(),
+
+          categoria:
+            document.getElementById("productoCategoria")
+              .value.trim() || null,
+
+          presentacion:
+            document.getElementById("productoPresentacion")
+              .value.trim() || null,
+
+          costo:
+            num("productoCosto"),
+
+          costo_camionero:
+            num("productoCostoCamionero"),
+
+          precio:
+            num("productoPrecio"),
+
+          precio_efectivo:
+            num("productoPrecioEfectivo"),
+
+          precio_mayorista_10:
+            num("productoMayorista10"),
+
+          precio_mayorista_20:
+            num("productoMayorista20"),
+
+          precio_mayorista_30:
+            num("productoMayorista30"),
+
+          stock:
+            Math.max(
+              0,
+              Math.trunc(num("productoStock"))
+            ),
+
+          stock_minimo:
+            Math.max(
+              0,
+              Math.trunc(num("productoStockMinimo"))
+            ),
+
+          activo:
+            document.getElementById("productoActivo")
+              .value === "true",
+
+          imagen_url:
+            document.getElementById("productoImagenUrl")
+              .value.trim() || null,
+
+          notas:
+            document.getElementById("productoNotas")
+              .value.trim() || null
+        };
+
+        let resultado;
+
+        if (id) {
+
+          resultado =
+            await supabaseClient
+              .from("productos")
+              .update(datos)
+              .eq("id", id);
+
+        } else {
+
+          resultado =
+            await supabaseClient
+              .from("productos")
+              .insert([datos]);
+        }
+
+        guardarProductoBtn.disabled = false;
+
+        guardarProductoBtn.textContent =
+          id
+            ? "Guardar cambios"
+            : "Guardar producto";
+
+        if (resultado.error) {
+
+          console.error(resultado.error);
+
+          mostrarMensaje(
+            productoMessage,
+            "No se pudo guardar el producto: " +
+              resultado.error.message,
+            "error"
+          );
+
+          return;
+        }
+
+        mostrarMensaje(
+          productoMessage,
+          "Producto guardado correctamente.",
+          "success"
+        );
+
+        await cargarProductos();
+        await cargarDashboard();
+
+        setTimeout(
+          cerrarModalProducto,
+          500
+        );
+      }
+    );
+
 
 
     /* =========================
