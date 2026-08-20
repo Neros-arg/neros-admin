@@ -645,6 +645,200 @@
       }
     }
 
+
+    /* NUEVA VENTA */
+    .sale-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sale-card {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .sale-card h3 {
+      font-size: 17px;
+      margin-bottom: 14px;
+    }
+
+    .sale-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .sale-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .client-search-results,
+    .product-search-results {
+      margin-top: 8px;
+      border: 1px solid #303030;
+      border-radius: 10px;
+      background: #111;
+      overflow: hidden;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .result-row {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid #242424;
+      background: transparent;
+      color: #eee;
+      text-align: left;
+      padding: 11px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .result-row:last-child {
+      border-bottom: 0;
+    }
+
+    .result-row:hover {
+      background: #1b1b1b;
+    }
+
+    .result-row small {
+      color: #888;
+      display: block;
+      margin-top: 3px;
+      font-size: 11px;
+    }
+
+    .selected-client {
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px solid rgba(214,170,89,.25);
+      background: rgba(214,170,89,.07);
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .selected-client strong {
+      color: var(--gold);
+    }
+
+    .selected-client small {
+      display: block;
+      color: #999;
+      margin-top: 3px;
+    }
+
+    .sale-product-tools {
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .cart-wrap {
+      overflow-x: auto;
+      border: 1px solid #292929;
+      border-radius: 12px;
+    }
+
+    .cart-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    .cart-table th,
+    .cart-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #252525;
+      font-size: 12px;
+    }
+
+    .cart-table th {
+      background: #111;
+      color: #999;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: .7px;
+    }
+
+    .cart-table input {
+      padding: 8px 9px;
+      border-radius: 8px;
+      min-width: 80px;
+    }
+
+    .cart-empty {
+      color: #777;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .sale-warning {
+      color: #f0c873;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .totals {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+      border-top: 1px solid #292929;
+      padding-top: 16px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      color: #bbb;
+    }
+
+    .total-row.final {
+      font-size: 23px;
+      font-weight: 900;
+      color: var(--gold);
+      padding-top: 6px;
+    }
+
+    .sale-submit {
+      width: 100%;
+      margin-top: 16px;
+      padding: 14px 18px;
+      font-size: 15px;
+    }
+
+    .sale-status {
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1050px) {
+      .sale-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .sale-grid,
+      .sale-product-tools {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 
@@ -936,15 +1130,209 @@
       <!-- NUEVA VENTA -->
       <section id="section-nuevaVenta" class="section">
 
-        <div class="panel">
+        <div class="sale-layout">
 
-          <div class="panel-header">
-            <h3>Nueva venta</h3>
+          <div>
+
+            <div class="sale-card">
+              <h3>1. Cliente</h3>
+
+              <div class="sale-grid">
+
+                <div class="full">
+                  <label>Buscar cliente</label>
+                  <input
+                    id="ventaBuscarCliente"
+                    type="text"
+                    placeholder="Nombre, apellido, DNI o teléfono..."
+                    autocomplete="off"
+                  />
+
+                  <div id="ventaClientesResultados" class="client-search-results hidden"></div>
+
+                  <div id="ventaClienteSeleccionado" class="selected-client hidden"></div>
+                </div>
+
+                <div>
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="ventaConsumidorFinalBtn"
+                    style="width:100%"
+                  >
+                    Usar Consumidor final
+                  </button>
+                </div>
+
+                <div>
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="ventaNuevoClienteBtn"
+                    style="width:100%"
+                  >
+                    + Crear cliente
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+
+            <div class="sale-card">
+              <h3>2. Agregar productos</h3>
+
+              <div class="sale-product-tools">
+
+                <div>
+                  <label>Buscar producto</label>
+                  <input
+                    id="ventaBuscarProducto"
+                    type="text"
+                    placeholder="Nombre o código..."
+                    autocomplete="off"
+                  />
+                </div>
+
+                <div>
+                  <label>Tipo de precio</label>
+                  <select id="ventaTipoPrecio">
+                    <option value="precio">Lista</option>
+                    <option value="precio_efectivo">Efectivo / Transferencia</option>
+                    <option value="precio_mayorista_10">Mayorista 10</option>
+                    <option value="precio_mayorista_20">Mayorista 20</option>
+                    <option value="precio_mayorista_30">Mayorista 30</option>
+                    <option value="personalizado">Personalizado</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <div id="ventaProductosResultados" class="product-search-results hidden"></div>
+            </div>
+
+
+            <div class="sale-card">
+              <h3>3. Carrito</h3>
+
+              <div class="cart-wrap">
+
+                <table class="cart-table">
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Cant.</th>
+                      <th>Precio unit.</th>
+                      <th>Desc.</th>
+                      <th>Subtotal</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="ventaCarritoBody"></tbody>
+                </table>
+
+                <div id="ventaCarritoVacio" class="cart-empty">
+                  Todavía no agregaste productos.
+                </div>
+
+              </div>
+            </div>
+
           </div>
 
-          <p style="color:#888">
-            Acá vamos a armar el carrito interno y registrar las ventas.
-          </p>
+
+          <div>
+
+            <div class="sale-card">
+              <h3>4. Cierre de venta</h3>
+
+              <div class="sale-grid">
+
+                <div>
+                  <label>Medio de pago</label>
+                  <select id="ventaMedioPago">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Mercado Pago">Mercado Pago</option>
+                    <option value="Débito">Débito</option>
+                    <option value="Crédito">Crédito</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label>Descuento general</label>
+                  <input
+                    id="ventaDescuentoGeneral"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+
+                <div>
+                  <label>Tipo de comprobante</label>
+                  <select id="ventaTipoComprobante">
+                    <option value="">Sin comprobante</option>
+                    <option value="Presupuesto">Presupuesto</option>
+                    <option value="Factura">Factura</option>
+                    <option value="Ticket">Ticket</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label>Número de comprobante</label>
+                  <input
+                    id="ventaNumeroComprobante"
+                    type="text"
+                    placeholder="Opcional"
+                  />
+                </div>
+
+                <div class="full">
+                  <label>Notas</label>
+                  <textarea
+                    id="ventaNotas"
+                    placeholder="Observaciones de la operación..."
+                  ></textarea>
+                </div>
+
+              </div>
+
+              <div class="totals">
+
+                <div class="total-row">
+                  <span>Subtotal</span>
+                  <strong id="ventaSubtotal">$0</strong>
+                </div>
+
+                <div class="total-row">
+                  <span>Descuento</span>
+                  <strong id="ventaDescuento">$0</strong>
+                </div>
+
+                <div class="total-row final">
+                  <span>TOTAL</span>
+                  <span id="ventaTotal">$0</span>
+                </div>
+
+              </div>
+
+              <button
+                class="btn btn-primary sale-submit"
+                id="confirmarVentaBtn"
+                type="button"
+              >
+                Confirmar venta
+              </button>
+
+              <div id="ventaMessage" class="message sale-status"></div>
+
+            </div>
+
+          </div>
 
         </div>
 
@@ -1358,6 +1746,73 @@
     let productosCache = [];
 
 
+    /* NUEVA VENTA */
+
+    const ventaBuscarCliente =
+      document.getElementById("ventaBuscarCliente");
+
+    const ventaClientesResultados =
+      document.getElementById("ventaClientesResultados");
+
+    const ventaClienteSeleccionado =
+      document.getElementById("ventaClienteSeleccionado");
+
+    const ventaConsumidorFinalBtn =
+      document.getElementById("ventaConsumidorFinalBtn");
+
+    const ventaNuevoClienteBtn =
+      document.getElementById("ventaNuevoClienteBtn");
+
+    const ventaBuscarProducto =
+      document.getElementById("ventaBuscarProducto");
+
+    const ventaTipoPrecio =
+      document.getElementById("ventaTipoPrecio");
+
+    const ventaProductosResultados =
+      document.getElementById("ventaProductosResultados");
+
+    const ventaCarritoBody =
+      document.getElementById("ventaCarritoBody");
+
+    const ventaCarritoVacio =
+      document.getElementById("ventaCarritoVacio");
+
+    const ventaMedioPago =
+      document.getElementById("ventaMedioPago");
+
+    const ventaDescuentoGeneral =
+      document.getElementById("ventaDescuentoGeneral");
+
+    const ventaTipoComprobante =
+      document.getElementById("ventaTipoComprobante");
+
+    const ventaNumeroComprobante =
+      document.getElementById("ventaNumeroComprobante");
+
+    const ventaNotas =
+      document.getElementById("ventaNotas");
+
+    const ventaSubtotal =
+      document.getElementById("ventaSubtotal");
+
+    const ventaDescuento =
+      document.getElementById("ventaDescuento");
+
+    const ventaTotal =
+      document.getElementById("ventaTotal");
+
+    const confirmarVentaBtn =
+      document.getElementById("confirmarVentaBtn");
+
+    const ventaMessage =
+      document.getElementById("ventaMessage");
+
+    let ventaCliente = null;
+    let ventaCarrito = [];
+
+
+
 
     /* =========================
        HELPERS
@@ -1588,6 +2043,10 @@
 
           if (section === "productos") {
             await cargarProductos();
+          }
+
+          if (section === "nuevaVenta") {
+            await prepararNuevaVenta();
           }
 
         }
@@ -2772,6 +3231,812 @@
         );
       }
     );
+
+
+
+
+    /* =========================
+       NUEVA VENTA
+    ========================= */
+
+    async function prepararNuevaVenta() {
+
+      if (!clientesCache.length) {
+        await cargarClientes();
+      }
+
+      if (!productosCache.length) {
+        await cargarProductos();
+      }
+
+      renderVentaClienteSeleccionado();
+      renderVentaCarrito();
+    }
+
+
+    function precioSegunTipo(producto, tipo) {
+
+      if (tipo === "personalizado") {
+        return numeroProducto(producto.precio);
+      }
+
+      return numeroProducto(producto[tipo]);
+    }
+
+
+    function nombreClienteVenta(cliente) {
+
+      if (!cliente) {
+        return "Consumidor final";
+      }
+
+      return `${cliente.nombre || ""} ${cliente.apellido || ""}`.trim()
+        || `Cliente #${cliente.id}`;
+    }
+
+
+    function renderVentaClienteSeleccionado() {
+
+      if (!ventaCliente) {
+
+        ventaClienteSeleccionado.classList.remove("hidden");
+
+        ventaClienteSeleccionado.innerHTML = `
+          <div>
+            <strong>Consumidor final</strong>
+            <small>Venta sin cliente registrado.</small>
+          </div>
+        `;
+
+        return;
+      }
+
+      ventaClienteSeleccionado.classList.remove("hidden");
+
+      ventaClienteSeleccionado.innerHTML = `
+        <div>
+          <strong>${escapeHtml(nombreClienteVenta(ventaCliente))}</strong>
+          <small>
+            ${escapeHtml(ventaCliente.telefono || ventaCliente.dni || ventaCliente.email || "Cliente registrado")}
+          </small>
+        </div>
+
+        <button
+          class="icon-btn"
+          type="button"
+          onclick="quitarClienteVenta()"
+        >
+          Quitar
+        </button>
+      `;
+    }
+
+
+    window.quitarClienteVenta =
+      function() {
+
+        ventaCliente = null;
+        ventaBuscarCliente.value = "";
+        ventaClientesResultados.classList.add("hidden");
+        renderVentaClienteSeleccionado();
+      };
+
+
+    ventaConsumidorFinalBtn.addEventListener(
+      "click",
+      () => {
+
+        ventaCliente = null;
+        ventaBuscarCliente.value = "";
+        ventaClientesResultados.classList.add("hidden");
+        renderVentaClienteSeleccionado();
+      }
+    );
+
+
+    ventaNuevoClienteBtn.addEventListener(
+      "click",
+      () => {
+
+        abrirClienteModal();
+      }
+    );
+
+
+    ventaBuscarCliente.addEventListener(
+      "input",
+      () => {
+
+        const q =
+          ventaBuscarCliente.value
+            .toLowerCase()
+            .trim();
+
+        if (!q) {
+          ventaClientesResultados.classList.add("hidden");
+          ventaClientesResultados.innerHTML = "";
+          return;
+        }
+
+        const resultados =
+          clientesCache
+            .filter(c => {
+
+              const texto = `
+                ${c.nombre || ""}
+                ${c.apellido || ""}
+                ${c.dni || ""}
+                ${c.telefono || ""}
+                ${c.email || ""}
+              `.toLowerCase();
+
+              return texto.includes(q);
+            })
+            .slice(0, 10);
+
+        ventaClientesResultados.innerHTML = "";
+
+        if (!resultados.length) {
+
+          ventaClientesResultados.innerHTML = `
+            <div style="padding:12px;color:#777">
+              No se encontraron clientes.
+            </div>
+          `;
+
+          ventaClientesResultados.classList.remove("hidden");
+          return;
+        }
+
+        resultados.forEach(cliente => {
+
+          const btn =
+            document.createElement("button");
+
+          btn.className = "result-row";
+          btn.type = "button";
+
+          btn.innerHTML = `
+            <span>
+              <strong>${escapeHtml(nombreClienteVenta(cliente))}</strong>
+              <small>
+                ${escapeHtml(cliente.telefono || "Sin teléfono")}
+                ${cliente.dni ? " · DNI " + escapeHtml(cliente.dni) : ""}
+              </small>
+            </span>
+            <span>Elegir</span>
+          `;
+
+          btn.addEventListener(
+            "click",
+            () => {
+
+              ventaCliente = cliente;
+              ventaBuscarCliente.value =
+                nombreClienteVenta(cliente);
+
+              ventaClientesResultados.classList.add("hidden");
+              renderVentaClienteSeleccionado();
+            }
+          );
+
+          ventaClientesResultados.appendChild(btn);
+        });
+
+        ventaClientesResultados.classList.remove("hidden");
+      }
+    );
+
+
+    ventaBuscarProducto.addEventListener(
+      "input",
+      renderBusquedaProductosVenta
+    );
+
+
+    ventaTipoPrecio.addEventListener(
+      "change",
+      () => {
+
+        if (ventaBuscarProducto.value.trim()) {
+          renderBusquedaProductosVenta();
+        }
+      }
+    );
+
+
+    function renderBusquedaProductosVenta() {
+
+      const q =
+        ventaBuscarProducto.value
+          .toLowerCase()
+          .trim();
+
+      ventaProductosResultados.innerHTML = "";
+
+      if (!q) {
+        ventaProductosResultados.classList.add("hidden");
+        return;
+      }
+
+      const resultados =
+        productosCache
+          .filter(p => {
+
+            if (p.activo === false) {
+              return false;
+            }
+
+            const texto = `
+              ${p.nombre || ""}
+              ${p.marca || ""}
+              ${p.codigo || ""}
+              ${p.presentacion || ""}
+            `.toLowerCase();
+
+            return texto.includes(q);
+          })
+          .slice(0, 12);
+
+      if (!resultados.length) {
+
+        ventaProductosResultados.innerHTML = `
+          <div style="padding:12px;color:#777">
+            No se encontraron productos.
+          </div>
+        `;
+
+        ventaProductosResultados.classList.remove("hidden");
+        return;
+      }
+
+      resultados.forEach(producto => {
+
+        const precio =
+          precioSegunTipo(
+            producto,
+            ventaTipoPrecio.value
+          );
+
+        const stock =
+          numeroProducto(producto.stock);
+
+        const btn =
+          document.createElement("button");
+
+        btn.type = "button";
+        btn.className = "result-row";
+
+        btn.innerHTML = `
+          <span>
+            <strong>${escapeHtml(producto.nombre || "Sin nombre")}</strong>
+            <small>
+              ${escapeHtml(producto.codigo || "")}
+              ${producto.presentacion ? " · " + escapeHtml(producto.presentacion) : ""}
+              · Stock: ${stock}
+              ${stock <= 0 ? " · ⚠ Sin stock" : ""}
+            </small>
+          </span>
+
+          <span style="white-space:nowrap">
+            ${formatoDinero(precio)}
+          </span>
+        `;
+
+        btn.addEventListener(
+          "click",
+          () => agregarProductoVenta(producto)
+        );
+
+        ventaProductosResultados.appendChild(btn);
+      });
+
+      ventaProductosResultados.classList.remove("hidden");
+    }
+
+
+    function agregarProductoVenta(producto) {
+
+      let precio =
+        precioSegunTipo(
+          producto,
+          ventaTipoPrecio.value
+        );
+
+      if (
+        ventaTipoPrecio.value === "personalizado"
+      ) {
+
+        const ingresado =
+          prompt(
+            `Precio personalizado para:\n${producto.nombre}`,
+            String(numeroProducto(producto.precio))
+          );
+
+        if (ingresado === null) {
+          return;
+        }
+
+        const convertido =
+          Number(
+            String(ingresado)
+              .replace(/\./g, "")
+              .replace(",", ".")
+          );
+
+        if (
+          !Number.isFinite(convertido) ||
+          convertido < 0
+        ) {
+
+          alert("Ingresá un precio válido.");
+          return;
+        }
+
+        precio = convertido;
+      }
+
+      const existente =
+        ventaCarrito.find(
+          item =>
+            item.producto_id === producto.id &&
+            item.precio_unitario === precio
+        );
+
+      if (existente) {
+
+        existente.cantidad += 1;
+
+      } else {
+
+        ventaCarrito.push({
+          producto_id: producto.id,
+          nombre: producto.nombre,
+          codigo: producto.codigo,
+          stock_actual: numeroProducto(producto.stock),
+          cantidad: 1,
+          precio_unitario: precio,
+          costo_unitario: numeroProducto(producto.costo),
+          descuento: 0
+        });
+      }
+
+      ventaBuscarProducto.value = "";
+      ventaProductosResultados.classList.add("hidden");
+
+      renderVentaCarrito();
+    }
+
+
+    function renderVentaCarrito() {
+
+      ventaCarritoBody.innerHTML = "";
+
+      ventaCarritoVacio.classList.toggle(
+        "hidden",
+        ventaCarrito.length !== 0
+      );
+
+      ventaCarrito.forEach(
+        (item, index) => {
+
+          const subtotal =
+            Math.max(
+              0,
+              item.cantidad *
+                item.precio_unitario -
+                item.descuento
+            );
+
+          const tr =
+            document.createElement("tr");
+
+          tr.innerHTML = `
+            <td>
+              <strong>${escapeHtml(item.nombre || "")}</strong>
+              ${
+                item.stock_actual <= 0
+                  ? '<div class="sale-warning">⚠ Sin stock registrado</div>'
+                  : item.cantidad > item.stock_actual
+                    ? '<div class="sale-warning">⚠ Cantidad supera el stock</div>'
+                    : ""
+              }
+            </td>
+
+            <td>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value="${item.cantidad}"
+                onchange="cambiarCantidadVenta(${index}, this.value)"
+              />
+            </td>
+
+            <td>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value="${item.precio_unitario}"
+                onchange="cambiarPrecioVenta(${index}, this.value)"
+              />
+            </td>
+
+            <td>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value="${item.descuento}"
+                onchange="cambiarDescuentoVenta(${index}, this.value)"
+              />
+            </td>
+
+            <td>
+              <strong>${formatoDinero(subtotal)}</strong>
+            </td>
+
+            <td>
+              <button
+                class="icon-btn"
+                type="button"
+                onclick="quitarProductoVenta(${index})"
+              >
+                Quitar
+              </button>
+            </td>
+          `;
+
+          ventaCarritoBody.appendChild(tr);
+        }
+      );
+
+      recalcularTotalesVenta();
+    }
+
+
+    window.cambiarCantidadVenta =
+      function(index, valor) {
+
+        const cantidad =
+          Math.max(
+            1,
+            Math.trunc(Number(valor) || 1)
+          );
+
+        ventaCarrito[index].cantidad =
+          cantidad;
+
+        renderVentaCarrito();
+      };
+
+
+    window.cambiarPrecioVenta =
+      function(index, valor) {
+
+        ventaCarrito[index].precio_unitario =
+          Math.max(
+            0,
+            Number(valor) || 0
+          );
+
+        renderVentaCarrito();
+      };
+
+
+    window.cambiarDescuentoVenta =
+      function(index, valor) {
+
+        ventaCarrito[index].descuento =
+          Math.max(
+            0,
+            Number(valor) || 0
+          );
+
+        renderVentaCarrito();
+      };
+
+
+    window.quitarProductoVenta =
+      function(index) {
+
+        ventaCarrito.splice(index, 1);
+        renderVentaCarrito();
+      };
+
+
+    ventaDescuentoGeneral.addEventListener(
+      "input",
+      recalcularTotalesVenta
+    );
+
+
+    function obtenerTotalesVenta() {
+
+      const subtotal =
+        ventaCarrito.reduce(
+          (acc, item) => {
+
+            return acc +
+              Math.max(
+                0,
+                item.cantidad *
+                  item.precio_unitario -
+                  item.descuento
+              );
+          },
+          0
+        );
+
+      const descuentoGeneral =
+        Math.max(
+          0,
+          Number(
+            ventaDescuentoGeneral.value
+          ) || 0
+        );
+
+      const total =
+        Math.max(
+          0,
+          subtotal - descuentoGeneral
+        );
+
+      return {
+        subtotal,
+        descuentoGeneral,
+        total
+      };
+    }
+
+
+    function recalcularTotalesVenta() {
+
+      const totales =
+        obtenerTotalesVenta();
+
+      ventaSubtotal.textContent =
+        formatoDinero(totales.subtotal);
+
+      ventaDescuento.textContent =
+        formatoDinero(
+          totales.descuentoGeneral
+        );
+
+      ventaTotal.textContent =
+        formatoDinero(totales.total);
+    }
+
+
+    confirmarVentaBtn.addEventListener(
+      "click",
+      confirmarVenta
+    );
+
+
+    async function confirmarVenta() {
+
+      limpiarMensaje(ventaMessage);
+
+      if (!ventaCarrito.length) {
+
+        mostrarMensaje(
+          ventaMessage,
+          "Agregá al menos un producto.",
+          "error"
+        );
+
+        return;
+      }
+
+      const totales =
+        obtenerTotalesVenta();
+
+      const confirmar =
+        confirm(
+          `Confirmar venta por ${formatoDinero(totales.total)}?`
+        );
+
+      if (!confirmar) {
+        return;
+      }
+
+      confirmarVentaBtn.disabled = true;
+      confirmarVentaBtn.textContent =
+        "Registrando venta...";
+
+      /*
+        Flujo MVP:
+        1) crea cabecera de venta
+        2) crea detalles
+        3) actualiza stock
+        Si un paso posterior falla, mostramos el error para corregirlo.
+      */
+
+      const ventaDatos = {
+
+        cliente_id:
+          ventaCliente?.id || null,
+
+        subtotal:
+          totales.subtotal,
+
+        descuento:
+          totales.descuentoGeneral,
+
+        total:
+          totales.total,
+
+        medio_pago:
+          ventaMedioPago.value,
+
+        estado:
+          "completada",
+
+        tipo_comprobante:
+          ventaTipoComprobante.value || null,
+
+        numero_comprobante:
+          ventaNumeroComprobante.value.trim() || null,
+
+        notas:
+          ventaNotas.value.trim() || null
+      };
+
+
+      const {
+        data: ventaCreada,
+        error: errorVenta
+      } =
+        await supabaseClient
+          .from("ventas")
+          .insert([ventaDatos])
+          .select("id")
+          .single();
+
+
+      if (errorVenta) {
+
+        console.error(errorVenta);
+
+        mostrarMensaje(
+          ventaMessage,
+          "No se pudo crear la venta: " +
+            errorVenta.message,
+          "error"
+        );
+
+        confirmarVentaBtn.disabled = false;
+        confirmarVentaBtn.textContent = "Confirmar venta";
+
+        return;
+      }
+
+
+      const ventaId =
+        ventaCreada.id;
+
+
+      const detalles =
+        ventaCarrito.map(item => ({
+
+          venta_id:
+            ventaId,
+
+          producto_id:
+            item.producto_id,
+
+          cantidad:
+            item.cantidad,
+
+          precio_unitario:
+            item.precio_unitario,
+
+          costo_unitario:
+            item.costo_unitario,
+
+          descuento:
+            item.descuento,
+
+          subtotal:
+            Math.max(
+              0,
+              item.cantidad *
+                item.precio_unitario -
+                item.descuento
+            )
+        }));
+
+
+      const { error: errorDetalle } =
+        await supabaseClient
+          .from("detalle_ventas")
+          .insert(detalles);
+
+
+      if (errorDetalle) {
+
+        console.error(errorDetalle);
+
+        mostrarMensaje(
+          ventaMessage,
+          `La venta #${ventaId} se creó, pero falló el detalle: ` +
+            errorDetalle.message,
+          "error"
+        );
+
+        confirmarVentaBtn.disabled = false;
+        confirmarVentaBtn.textContent = "Confirmar venta";
+
+        return;
+      }
+
+
+      let erroresStock = [];
+
+      for (const item of ventaCarrito) {
+
+        const nuevoStock =
+          item.stock_actual -
+          item.cantidad;
+
+        const { error } =
+          await supabaseClient
+            .from("productos")
+            .update({
+              stock: nuevoStock
+            })
+            .eq("id", item.producto_id);
+
+        if (error) {
+
+          console.error(error);
+          erroresStock.push(item.nombre);
+        }
+      }
+
+
+      if (erroresStock.length) {
+
+        mostrarMensaje(
+          ventaMessage,
+          `Venta #${ventaId} registrada, pero no se pudo actualizar el stock de: ` +
+            erroresStock.join(", "),
+          "error"
+        );
+
+      } else {
+
+        mostrarMensaje(
+          ventaMessage,
+          `Venta #${ventaId} registrada correctamente.`,
+          "success"
+        );
+      }
+
+
+      ventaCarrito = [];
+      ventaCliente = null;
+
+      ventaBuscarCliente.value = "";
+      ventaBuscarProducto.value = "";
+      ventaDescuentoGeneral.value = "0";
+      ventaNumeroComprobante.value = "";
+      ventaNotas.value = "";
+      ventaTipoComprobante.value = "";
+      ventaMedioPago.value = "Efectivo";
+
+      await cargarProductos();
+      await cargarDashboard();
+      await cargarClientes();
+
+      renderVentaClienteSeleccionado();
+      renderVentaCarrito();
+
+      confirmarVentaBtn.disabled = false;
+      confirmarVentaBtn.textContent = "Confirmar venta";
+    }
 
 
 
