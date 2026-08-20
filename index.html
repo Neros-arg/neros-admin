@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NERÓS Admin</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(192, 147, 72, 0.16), transparent 35%),
+        linear-gradient(135deg, #111111, #1b1b1b 50%, #0d0d0d);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .brand h1 {
+      font-size: 42px;
+      letter-spacing: 8px;
+      font-weight: 700;
+      color: #d4af6a;
+    }
+
+    .brand p {
+      margin-top: 8px;
+      color: #aaa;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: rgba(20, 20, 20, 0.92);
+      border: 1px solid rgba(212, 175, 106, 0.25);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(10px);
+    }
+
+    .card h2 {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #999;
+      font-size: 14px;
+      margin-bottom: 26px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #cfcfcf;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 15px;
+      border: 1px solid #333;
+      border-radius: 10px;
+      background: #151515;
+      color: #fff;
+      outline: none;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+
+    input:focus {
+      border-color: #d4af6a;
+      box-shadow: 0 0 0 3px rgba(212, 175, 106, 0.08);
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, #d4af6a, #b68c43);
+      color: #111;
+      transition: 0.2s;
+      margin-top: 6px;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .message {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      line-height: 1.4;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(255, 72, 72, 0.1);
+      color: #ff8d8d;
+      border: 1px solid rgba(255, 72, 72, 0.25);
+    }
+
+    .message.success {
+      display: block;
+      background: rgba(81, 207, 102, 0.1);
+      color: #91e6a0;
+      border: 1px solid rgba(81, 207, 102, 0.25);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      color: #666;
+      font-size: 12px;
+    }
+
+    #adminPanel {
+      display: none;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .admin-box {
+      background: #151515;
+      border: 1px solid rgba(212, 175, 106, 0.25);
+      border-radius: 20px;
+      padding: 32px;
+    }
+
+    .admin-box h2 {
+      color: #d4af6a;
+      margin-bottom: 10px;
+    }
+
+    .admin-box p {
+      color: #bbb;
+      margin-bottom: 20px;
+    }
+
+    .logout-btn {
+      width: auto;
+      padding-left: 22px;
+      padding-right: 22px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-container" id="loginView">
+
+    <div class="brand">
+      <h1>NERÓS</h1>
+      <p>Administration System</p>
+    </div>
+
+    <div class="card">
+      <h2>Bienvenido</h2>
+      <p class="subtitle">Ingresá para acceder al sistema interno.</p>
+
+      <form id="loginForm">
+
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input
+            type="email"
+            id="email"
+            placeholder="tu@email.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button type="submit" id="loginBtn">
+          Ingresar
+        </button>
+
+        <div id="message" class="message"></div>
+
+      </form>
+    </div>
+
+    <div class="footer">
+      NERÓS © 2026 · Sistema interno
+    </div>
+
+  </div>
+
+
+  <div id="adminPanel">
+    <div class="admin-box">
+      <h2>NERÓS ADMIN</h2>
+      <p>Inicio de sesión correcto. El dashboard se va a construir acá.</p>
+
+      <button class="logout-btn" id="logoutBtn">
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
+
+
+  <script>
+    const SUPABASE_URL = "https://zekjtgjtjzfntkdcgrvs.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_40mNTAv6a6Su10l5UMTXEQ_pRcIUjL5";
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+
+    const loginView = document.getElementById("loginView");
+    const adminPanel = document.getElementById("adminPanel");
+
+    const loginForm = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    const message = document.getElementById("message");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+
+    function mostrarLogin() {
+      loginView.style.display = "block";
+      adminPanel.style.display = "none";
+    }
+
+
+    function mostrarAdmin() {
+      loginView.style.display = "none";
+      adminPanel.style.display = "block";
+    }
+
+
+    function mostrarMensaje(texto, tipo = "error") {
+      message.textContent = texto;
+      message.className = "message " + tipo;
+    }
+
+
+    function limpiarMensaje() {
+      message.textContent = "";
+      message.className = "message";
+    }
+
+
+    loginForm.addEventListener("submit", async (event) => {
+
+      event.preventDefault();
+
+      limpiarMensaje();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Ingresando...";
+
+
+      const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+
+      if (error) {
+
+        console.error(error);
+
+        mostrarMensaje(
+          "No pudimos iniciar sesión. Revisá el correo y la contraseña.",
+          "error"
+        );
+
+      } else {
+
+        mostrarMensaje(
+          "Inicio de sesión correcto.",
+          "success"
+        );
+
+        setTimeout(() => {
+          mostrarAdmin();
+        }, 500);
+      }
+
+
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Ingresar";
+
+    });
+
+
+    logoutBtn.addEventListener("click", async () => {
+
+      await supabaseClient.auth.signOut();
+
+      emailInput.value = "";
+      passwordInput.value = "";
+
+      mostrarLogin();
+
+    });
+
+
+    async function verificarSesion() {
+
+      const {
+        data: { session }
+      } = await supabaseClient.auth.getSession();
+
+      if (session) {
+        mostrarAdmin();
+      } else {
+        mostrarLogin();
+      }
+
+    }
+
+
+    verificarSesion();
+
+  </script>
+
+</body>
+</html>
