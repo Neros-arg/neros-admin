@@ -839,6 +839,147 @@
       }
     }
 
+
+    /* HISTORIAL DE VENTAS */
+    .sales-filters {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 180px 180px;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .sales-summary {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .sale-status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #333;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .sale-status-badge.ok {
+      color: #9be2ad;
+      border-color: rgba(100,193,124,.35);
+      background: rgba(100,193,124,.10);
+    }
+
+    .sale-status-badge.cancelled {
+      color: #ff9696;
+      border-color: rgba(212,91,91,.35);
+      background: rgba(212,91,91,.10);
+    }
+
+    .sale-status-badge.other {
+      color: #f0c873;
+      border-color: rgba(214,170,89,.35);
+      background: rgba(214,170,89,.10);
+    }
+
+    .sale-table table {
+      min-width: 1050px;
+    }
+
+    .sale-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .sale-detail-box {
+      border: 1px solid #2b2b2b;
+      border-radius: 12px;
+      padding: 12px;
+      background: #121212;
+    }
+
+    .sale-detail-box small {
+      color: #777;
+      display: block;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-size: 10px;
+    }
+
+    .sale-detail-box strong {
+      color: #eee;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .detail-products-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    .detail-products-table th,
+    .detail-products-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #252525;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .detail-products-table th {
+      background: #111;
+      color: #999;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: .7px;
+    }
+
+    .sale-detail-total {
+      display: grid;
+      gap: 8px;
+      margin-top: 18px;
+      border-top: 1px solid #2a2a2a;
+      padding-top: 16px;
+    }
+
+    .sale-detail-total .line {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: #bbb;
+    }
+
+    .sale-detail-total .line.final {
+      color: var(--gold);
+      font-size: 22px;
+      font-weight: 900;
+      margin-top: 4px;
+    }
+
+    .sale-actions-bottom {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 800px) {
+      .sales-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .sale-detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 
@@ -1342,15 +1483,60 @@
       <!-- VENTAS -->
       <section id="section-ventas" class="section">
 
-        <div class="panel">
+        <div class="sales-filters">
 
-          <div class="panel-header">
-            <h3>Historial de ventas</h3>
+          <input
+            id="buscarVenta"
+            type="text"
+            placeholder="Buscar por #, cliente, medio de pago o comprobante..."
+          />
+
+          <select id="filtroEstadoVenta">
+            <option value="todos">Todos los estados</option>
+            <option value="completada">Completadas</option>
+            <option value="anulada">Anuladas</option>
+          </select>
+
+          <select id="filtroPagoVenta">
+            <option value="todos">Todos los medios</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Mercado Pago">Mercado Pago</option>
+            <option value="Débito">Débito</option>
+            <option value="Crédito">Crédito</option>
+            <option value="Otro">Otro</option>
+          </select>
+
+        </div>
+
+        <div id="ventasLoading" class="loading hidden">
+          Cargando ventas...
+        </div>
+
+        <div id="ventasSummary" class="sales-summary"></div>
+
+        <div class="table-wrap sale-table">
+
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Medio de pago</th>
+                <th>Comprobante</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody id="ventasBody"></tbody>
+          </table>
+
+          <div id="ventasEmpty" class="empty hidden">
+            Todavía no hay ventas registradas.
           </div>
-
-          <p style="color:#888">
-            Acá vamos a mostrar todas las operaciones realizadas.
-          </p>
 
         </div>
 
@@ -1591,6 +1777,23 @@
 
   </div>
 
+
+  <!-- MODAL DETALLE VENTA -->
+  <div id="ventaDetalleModal" class="modal-backdrop hidden">
+
+    <div class="modal" style="max-width:980px">
+
+      <div class="modal-header">
+        <h3 id="ventaDetalleTitle">Detalle de venta</h3>
+        <button class="close-btn" id="cerrarVentaDetalle">×</button>
+      </div>
+
+      <div id="ventaDetalleContenido"></div>
+
+    </div>
+
+  </div>
+
   <script>
 
     /* =========================
@@ -1812,6 +2015,45 @@
     let ventaCarrito = [];
 
 
+    /* HISTORIAL DE VENTAS */
+
+    const buscarVenta =
+      document.getElementById("buscarVenta");
+
+    const filtroEstadoVenta =
+      document.getElementById("filtroEstadoVenta");
+
+    const filtroPagoVenta =
+      document.getElementById("filtroPagoVenta");
+
+    const ventasLoading =
+      document.getElementById("ventasLoading");
+
+    const ventasSummary =
+      document.getElementById("ventasSummary");
+
+    const ventasBody =
+      document.getElementById("ventasBody");
+
+    const ventasEmpty =
+      document.getElementById("ventasEmpty");
+
+    const ventaDetalleModal =
+      document.getElementById("ventaDetalleModal");
+
+    const ventaDetalleTitle =
+      document.getElementById("ventaDetalleTitle");
+
+    const ventaDetalleContenido =
+      document.getElementById("ventaDetalleContenido");
+
+    const cerrarVentaDetalle =
+      document.getElementById("cerrarVentaDetalle");
+
+    let ventasCache = [];
+
+
+
 
 
     /* =========================
@@ -1958,6 +2200,7 @@
       await cargarDashboard();
       await cargarClientes();
       await cargarProductos();
+      await cargarVentas();
 
     }
 
@@ -2047,6 +2290,10 @@
 
           if (section === "nuevaVenta") {
             await prepararNuevaVenta();
+          }
+
+          if (section === "ventas") {
+            await cargarVentas();
           }
 
         }
@@ -4037,6 +4284,690 @@
       confirmarVentaBtn.disabled = false;
       confirmarVentaBtn.textContent = "Confirmar venta";
     }
+
+
+
+
+    /* =========================
+       HISTORIAL DE VENTAS
+    ========================= */
+
+    function estadoVentaClase(estado) {
+
+      if (estado === "completada") {
+        return "ok";
+      }
+
+      if (estado === "anulada") {
+        return "cancelled";
+      }
+
+      return "other";
+    }
+
+
+    async function cargarVentas() {
+
+      ventasLoading.classList.remove("hidden");
+
+      /*
+        Traemos las ventas con su cliente relacionado.
+        Los productos de cada venta se consultan al abrir el detalle,
+        así el historial inicial carga más rápido.
+      */
+      const { data, error } =
+        await supabaseClient
+          .from("ventas")
+          .select(`
+            id,
+            created_at,
+            cliente_id,
+            subtotal,
+            descuento,
+            total,
+            medio_pago,
+            estado,
+            tipo_comprobante,
+            numero_comprobante,
+            notas,
+            cliente:clientes (
+              id,
+              nombre,
+              apellido,
+              dni,
+              telefono,
+              email
+            )
+          `)
+          .order("created_at", {
+            ascending: false
+          });
+
+      ventasLoading.classList.add("hidden");
+
+      if (error) {
+
+        console.error(error);
+
+        alert(
+          "No se pudieron cargar las ventas: " +
+          error.message
+        );
+
+        return;
+      }
+
+      ventasCache = data || [];
+      aplicarFiltrosVentas();
+    }
+
+
+    function nombreClienteHistorial(venta) {
+
+      const c = venta.cliente;
+
+      if (!c) {
+        return "Consumidor final";
+      }
+
+      const nombre =
+        `${c.nombre || ""} ${c.apellido || ""}`.trim();
+
+      return nombre || `Cliente #${c.id}`;
+    }
+
+
+    function aplicarFiltrosVentas() {
+
+      const q =
+        (buscarVenta.value || "")
+          .toLowerCase()
+          .trim();
+
+      const estado =
+        filtroEstadoVenta.value;
+
+      const medioPago =
+        filtroPagoVenta.value;
+
+      const filtradas =
+        ventasCache.filter(v => {
+
+          if (
+            estado !== "todos" &&
+            v.estado !== estado
+          ) {
+            return false;
+          }
+
+          if (
+            medioPago !== "todos" &&
+            v.medio_pago !== medioPago
+          ) {
+            return false;
+          }
+
+          if (q) {
+
+            const texto = `
+              ${v.id}
+              ${nombreClienteHistorial(v)}
+              ${v.medio_pago || ""}
+              ${v.tipo_comprobante || ""}
+              ${v.numero_comprobante || ""}
+              ${v.estado || ""}
+            `.toLowerCase();
+
+            if (!texto.includes(q)) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+
+      renderVentas(filtradas);
+    }
+
+
+    function renderVentas(ventas) {
+
+      ventasBody.innerHTML = "";
+
+      ventasEmpty.classList.toggle(
+        "hidden",
+        ventas.length !== 0
+      );
+
+      ventasSummary.textContent =
+        `${ventas.length.toLocaleString("es-AR")} de ` +
+        `${ventasCache.length.toLocaleString("es-AR")} ventas`;
+
+      ventas.forEach(venta => {
+
+        const tr =
+          document.createElement("tr");
+
+        const comprobante =
+          venta.tipo_comprobante
+            ? `${venta.tipo_comprobante}` +
+              (
+                venta.numero_comprobante
+                  ? ` · ${venta.numero_comprobante}`
+                  : ""
+              )
+            : "—";
+
+        tr.innerHTML = `
+          <td>
+            <strong>#${venta.id}</strong>
+          </td>
+
+          <td>
+            ${formatoFechaHora(venta.created_at)}
+          </td>
+
+          <td>
+            <strong>${escapeHtml(nombreClienteHistorial(venta))}</strong>
+          </td>
+
+          <td>
+            ${escapeHtml(venta.medio_pago || "—")}
+          </td>
+
+          <td>
+            ${escapeHtml(comprobante)}
+          </td>
+
+          <td>
+            <strong>${formatoDinero(venta.total)}</strong>
+          </td>
+
+          <td>
+            <span class="sale-status-badge ${estadoVentaClase(venta.estado)}">
+              ${escapeHtml(venta.estado || "—")}
+            </span>
+          </td>
+
+          <td>
+            <div class="actions">
+
+              <button
+                class="icon-btn"
+                type="button"
+                onclick="verDetalleVenta(${venta.id})"
+              >
+                Ver detalle
+              </button>
+
+              ${
+                venta.estado !== "anulada"
+                  ? `
+                    <button
+                      class="icon-btn"
+                      type="button"
+                      onclick="anularVenta(${venta.id})"
+                    >
+                      Anular
+                    </button>
+                  `
+                  : ""
+              }
+
+            </div>
+          </td>
+        `;
+
+        ventasBody.appendChild(tr);
+      });
+    }
+
+
+    function formatoFechaHora(fecha) {
+
+      if (!fecha) return "—";
+
+      const d =
+        new Date(fecha);
+
+      return d.toLocaleString(
+        "es-AR",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      );
+    }
+
+
+    buscarVenta.addEventListener(
+      "input",
+      aplicarFiltrosVentas
+    );
+
+    filtroEstadoVenta.addEventListener(
+      "change",
+      aplicarFiltrosVentas
+    );
+
+    filtroPagoVenta.addEventListener(
+      "change",
+      aplicarFiltrosVentas
+    );
+
+
+    cerrarVentaDetalle.addEventListener(
+      "click",
+      () =>
+        ventaDetalleModal.classList.add("hidden")
+    );
+
+    ventaDetalleModal.addEventListener(
+      "click",
+      event => {
+
+        if (event.target === ventaDetalleModal) {
+          ventaDetalleModal.classList.add("hidden");
+        }
+      }
+    );
+
+
+    window.verDetalleVenta =
+      async function(id) {
+
+        const venta =
+          ventasCache.find(
+            v => v.id === id
+          );
+
+        if (!venta) return;
+
+        ventaDetalleTitle.textContent =
+          `Venta #${venta.id}`;
+
+        ventaDetalleContenido.innerHTML = `
+          <div class="loading">
+            Cargando detalle...
+          </div>
+        `;
+
+        ventaDetalleModal.classList.remove("hidden");
+
+
+        const { data: detalles, error } =
+          await supabaseClient
+            .from("detalle_ventas")
+            .select(`
+              id,
+              cantidad,
+              precio_unitario,
+              costo_unitario,
+              descuento,
+              subtotal,
+              producto:productos (
+                id,
+                nombre,
+                codigo,
+                presentacion
+              )
+            `)
+            .eq("venta_id", id)
+            .order("id", {
+              ascending: true
+            });
+
+
+        if (error) {
+
+          console.error(error);
+
+          ventaDetalleContenido.innerHTML = `
+            <div class="message error" style="display:block">
+              No se pudo cargar el detalle: ${escapeHtml(error.message)}
+            </div>
+          `;
+
+          return;
+        }
+
+
+        const filas =
+          (detalles || []).map(detalle => {
+
+            const producto =
+              detalle.producto;
+
+            const nombre =
+              producto?.nombre ||
+              "Producto eliminado / no disponible";
+
+            const codigo =
+              producto?.codigo || "";
+
+            return `
+              <tr>
+                <td>
+                  <strong>${escapeHtml(nombre)}</strong>
+                  ${
+                    codigo
+                      ? `<div class="muted-cell" style="margin-top:3px">${escapeHtml(codigo)}</div>`
+                      : ""
+                  }
+                </td>
+                <td>${detalle.cantidad}</td>
+                <td>${formatoDinero(detalle.precio_unitario)}</td>
+                <td>${formatoDinero(detalle.descuento)}</td>
+                <td><strong>${formatoDinero(detalle.subtotal)}</strong></td>
+              </tr>
+            `;
+          })
+          .join("");
+
+
+        const comprobante =
+          venta.tipo_comprobante
+            ? `${venta.tipo_comprobante}` +
+              (
+                venta.numero_comprobante
+                  ? ` · ${venta.numero_comprobante}`
+                  : ""
+              )
+            : "Sin comprobante";
+
+
+        ventaDetalleContenido.innerHTML = `
+
+          <div class="sale-detail-grid">
+
+            <div class="sale-detail-box">
+              <small>Cliente</small>
+              <strong>${escapeHtml(nombreClienteHistorial(venta))}</strong>
+            </div>
+
+            <div class="sale-detail-box">
+              <small>Fecha</small>
+              <strong>${escapeHtml(formatoFechaHora(venta.created_at))}</strong>
+            </div>
+
+            <div class="sale-detail-box">
+              <small>Estado</small>
+              <strong>${escapeHtml(venta.estado || "—")}</strong>
+            </div>
+
+            <div class="sale-detail-box">
+              <small>Medio de pago</small>
+              <strong>${escapeHtml(venta.medio_pago || "—")}</strong>
+            </div>
+
+            <div class="sale-detail-box">
+              <small>Comprobante</small>
+              <strong>${escapeHtml(comprobante)}</strong>
+            </div>
+
+            <div class="sale-detail-box">
+              <small>Venta</small>
+              <strong>#${venta.id}</strong>
+            </div>
+
+          </div>
+
+
+          <div class="table-wrap">
+            <table class="detail-products-table">
+
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio unit.</th>
+                  <th>Descuento</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                ${
+                  filas ||
+                  `
+                    <tr>
+                      <td colspan="5" style="color:#777;text-align:center">
+                        No hay productos en esta venta.
+                      </td>
+                    </tr>
+                  `
+                }
+              </tbody>
+
+            </table>
+          </div>
+
+
+          ${
+            venta.notas
+              ? `
+                <div class="sale-detail-box" style="margin-top:16px">
+                  <small>Notas</small>
+                  <strong>${escapeHtml(venta.notas)}</strong>
+                </div>
+              `
+              : ""
+          }
+
+
+          <div class="sale-detail-total">
+
+            <div class="line">
+              <span>Subtotal</span>
+              <strong>${formatoDinero(venta.subtotal)}</strong>
+            </div>
+
+            <div class="line">
+              <span>Descuento</span>
+              <strong>${formatoDinero(venta.descuento)}</strong>
+            </div>
+
+            <div class="line final">
+              <span>TOTAL</span>
+              <span>${formatoDinero(venta.total)}</span>
+            </div>
+
+          </div>
+
+
+          <div class="sale-actions-bottom">
+
+            <button
+              class="btn btn-secondary"
+              type="button"
+              onclick="cerrarDetalleVentaDesdeBoton()"
+            >
+              Cerrar
+            </button>
+
+            ${
+              venta.estado !== "anulada"
+                ? `
+                  <button
+                    class="btn btn-danger"
+                    type="button"
+                    onclick="anularVenta(${venta.id})"
+                  >
+                    Anular venta
+                  </button>
+                `
+                : ""
+            }
+
+          </div>
+        `;
+      };
+
+
+    window.cerrarDetalleVentaDesdeBoton =
+      function() {
+
+        ventaDetalleModal.classList.add("hidden");
+      };
+
+
+    window.anularVenta =
+      async function(id) {
+
+        const venta =
+          ventasCache.find(
+            v => v.id === id
+          );
+
+        if (!venta) return;
+
+        if (venta.estado === "anulada") {
+
+          alert(
+            "Esta venta ya está anulada."
+          );
+
+          return;
+        }
+
+        const confirmar =
+          confirm(
+            `¿Anular la venta #${id}?\n\n` +
+            `Se devolverán al stock los productos de esta venta.`
+          );
+
+        if (!confirmar) return;
+
+
+        /*
+          Primero consultamos los detalles para saber cuánto devolver.
+        */
+        const {
+          data: detalles,
+          error: errorDetalles
+        } =
+          await supabaseClient
+            .from("detalle_ventas")
+            .select(`
+              producto_id,
+              cantidad,
+              producto:productos (
+                id,
+                nombre,
+                stock
+              )
+            `)
+            .eq("venta_id", id);
+
+
+        if (errorDetalles) {
+
+          console.error(errorDetalles);
+
+          alert(
+            "No se pudo leer el detalle de la venta."
+          );
+
+          return;
+        }
+
+
+        /*
+          Restauramos el stock de cada producto.
+          Si un producto fue eliminado, simplemente no se puede restaurar.
+        */
+        const erroresStock = [];
+
+        for (const detalle of (detalles || [])) {
+
+          if (
+            !detalle.producto_id ||
+            !detalle.producto
+          ) {
+            continue;
+          }
+
+          const stockActual =
+            numeroProducto(
+              detalle.producto.stock
+            );
+
+          const devolver =
+            numeroProducto(
+              detalle.cantidad
+            );
+
+          const { error } =
+            await supabaseClient
+              .from("productos")
+              .update({
+                stock:
+                  stockActual + devolver
+              })
+              .eq(
+                "id",
+                detalle.producto_id
+              );
+
+          if (error) {
+
+            console.error(error);
+
+            erroresStock.push(
+              detalle.producto.nombre ||
+              `Producto #${detalle.producto_id}`
+            );
+          }
+        }
+
+
+        if (erroresStock.length) {
+
+          alert(
+            "No se pudo devolver el stock de: " +
+            erroresStock.join(", ") +
+            ". La venta no se anuló para evitar inconsistencias."
+          );
+
+          return;
+        }
+
+
+        const { error: errorAnular } =
+          await supabaseClient
+            .from("ventas")
+            .update({
+              estado: "anulada"
+            })
+            .eq("id", id);
+
+
+        if (errorAnular) {
+
+          console.error(errorAnular);
+
+          alert(
+            "El stock se devolvió, pero no se pudo marcar la venta como anulada. " +
+            "Revisá la venta antes de continuar."
+          );
+
+          return;
+        }
+
+
+        ventaDetalleModal.classList.add("hidden");
+
+        await cargarVentas();
+        await cargarProductos();
+        await cargarDashboard();
+
+        alert(
+          `Venta #${id} anulada correctamente.`
+        );
+      };
 
 
 
