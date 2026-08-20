@@ -1179,6 +1179,20 @@
       }
     }
 
+
+    /* COMPROBANTE INTERNO */
+    .receipt-note {
+      color: #777;
+      font-size: 11px;
+      margin-top: 6px;
+      line-height: 1.45;
+    }
+
+    .receipt-btn {
+      border-color: rgba(214,170,89,.35) !important;
+      color: var(--gold) !important;
+    }
+
   </style>
 </head>
 
@@ -5538,7 +5552,7 @@
 
         mostrarMensaje(
           ventaMessage,
-          `Venta #${ventaId} registrada correctamente.`,
+          `Venta #${ventaId} registrada correctamente. Podés imprimir el comprobante desde la sección Ventas.`,
           "success"
         );
       }
@@ -5780,6 +5794,14 @@
                 onclick="verDetalleVenta(${venta.id})"
               >
                 Ver detalle
+              </button>
+
+              <button
+                class="icon-btn receipt-btn"
+                type="button"
+                onclick="imprimirComprobanteVenta(${venta.id})"
+              >
+                Imprimir
               </button>
 
               ${
@@ -6070,6 +6092,14 @@
               Cerrar
             </button>
 
+            <button
+              class="btn btn-secondary receipt-btn"
+              type="button"
+              onclick="imprimirComprobanteVenta(${venta.id})"
+            >
+              Imprimir comprobante
+            </button>
+
             ${
               venta.estado !== "anulada"
                 ? `
@@ -6252,6 +6282,645 @@
       };
 
 
+
+
+
+    /* =========================
+       COMPROBANTE INTERNO
+    ========================= */
+
+    function escapeReceipt(texto) {
+
+      return String(texto ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+
+    function formatoNumeroComprobanteInterno(id) {
+
+      return String(id).padStart(6, "0");
+    }
+
+
+    window.imprimirComprobanteVenta =
+      async function(id) {
+
+        let venta =
+          ventasCache.find(
+            v => v.id === id
+          );
+
+        if (!venta) {
+
+          await cargarVentas();
+
+          venta =
+            ventasCache.find(
+              v => v.id === id
+            );
+        }
+
+        if (!venta) {
+
+          alert(
+            "No se encontró la venta."
+          );
+
+          return;
+        }
+
+
+        const { data: detalles, error } =
+          await supabaseClient
+            .from("detalle_ventas")
+            .select(`
+              id,
+              cantidad,
+              precio_unitario,
+              descuento,
+              subtotal,
+              producto:productos (
+                id,
+                nombre,
+                codigo,
+                presentacion
+              )
+            `)
+            .eq("venta_id", id)
+            .order(
+              "id",
+              { ascending: true }
+            );
+
+
+        if (error) {
+
+          console.error(error);
+
+          alert(
+            "No se pudo preparar el comprobante: " +
+            error.message
+          );
+
+          return;
+        }
+
+
+        const cliente =
+          venta.cliente;
+
+
+        const nombreCliente =
+          cliente
+            ? `${cliente.nombre || ""} ${cliente.apellido || ""}`.trim()
+            : "Consumidor final";
+
+
+        const documentoCliente =
+          cliente?.dni
+            ? cliente.dni
+            : "—";
+
+
+        const telefonoCliente =
+          cliente?.telefono
+            ? cliente.telefono
+            : "—";
+
+
+        const filas =
+          (detalles || [])
+            .map(detalle => {
+
+              const producto =
+                detalle.producto;
+
+              const nombre =
+                producto?.nombre ||
+                "Producto no disponible";
+
+              const presentacion =
+                producto?.presentacion
+                  ? ` · ${producto.presentacion}`
+                  : "";
+
+              return `
+                <tr>
+                  <td class="desc">
+                    <strong>${escapeReceipt(nombre)}</strong>
+                    <div class="secondary">
+                      ${escapeReceipt(producto?.codigo || "")}${escapeReceipt(presentacion)}
+                    </div>
+                  </td>
+
+                  <td class="qty">
+                    ${Number(detalle.cantidad || 0)}
+                  </td>
+
+                  <td class="money">
+                    ${formatoDinero(detalle.precio_unitario)}
+                  </td>
+
+                  <td class="money">
+                    ${formatoDinero(detalle.subtotal)}
+                  </td>
+                </tr>
+              `;
+            })
+            .join("");
+
+
+        const estadoTexto =
+          (venta.estado || "completada")
+            .toUpperCase();
+
+
+        const comprobanteFiscal =
+          venta.tipo_comprobante
+            ? `${venta.tipo_comprobante}` +
+              (
+                venta.numero_comprobante
+                  ? ` ${venta.numero_comprobante}`
+                  : ""
+              )
+            : "No emitido";
+
+
+        const ventana =
+          window.open(
+            "",
+            "_blank",
+            "width=900,height=900"
+          );
+
+
+        if (!ventana) {
+
+          alert(
+            "El navegador bloqueó la ventana de impresión. Permití ventanas emergentes para este sitio."
+          );
+
+          return;
+        }
+
+
+        ventana.document.write(`
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Comprobante NERÓS #${formatoNumeroComprobanteInterno(venta.id)}</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    @page {
+      size: A4;
+      margin: 12mm;
+    }
+
+    body {
+      margin: 0;
+      background: #efefef;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #171717;
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 800px;
+      margin: 24px auto;
+      background: #fff;
+      padding: 34px;
+      border: 1px solid #ddd;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 28px;
+      padding-bottom: 22px;
+      border-bottom: 2px solid #171717;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 31px;
+      letter-spacing: 6px;
+    }
+
+    .brand .tag {
+      margin-top: 6px;
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      color: #666;
+    }
+
+    .doc-info {
+      text-align: right;
+    }
+
+    .doc-info .type {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+    }
+
+    .doc-info .number {
+      font-size: 23px;
+      font-weight: 800;
+      margin: 4px 0;
+    }
+
+    .doc-info .status {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 8px;
+      border: 1px solid #bbb;
+      display: inline-block;
+      border-radius: 999px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px 24px;
+      padding: 22px 0;
+    }
+
+    .meta {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+    }
+
+    .meta small {
+      display: block;
+      color: #777;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 5px;
+    }
+
+    .meta strong {
+      font-size: 13px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 2px solid #171717;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    td {
+      padding: 12px 8px;
+      border-bottom: 1px solid #ddd;
+      font-size: 12px;
+      vertical-align: top;
+    }
+
+    .desc {
+      width: 55%;
+    }
+
+    .secondary {
+      color: #777;
+      font-size: 10px;
+      margin-top: 4px;
+    }
+
+    .qty {
+      text-align: center;
+      width: 10%;
+    }
+
+    .money {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .totals {
+      width: 330px;
+      max-width: 100%;
+      margin-left: auto;
+      margin-top: 22px;
+    }
+
+    .line {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 7px 0;
+      font-size: 13px;
+    }
+
+    .line.final {
+      border-top: 2px solid #171717;
+      margin-top: 6px;
+      padding-top: 12px;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .notes {
+      margin-top: 24px;
+      padding: 13px;
+      border: 1px solid #ddd;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 32px;
+      padding-top: 18px;
+      border-top: 1px solid #ddd;
+      text-align: center;
+    }
+
+    .footer strong {
+      display: block;
+      margin-bottom: 5px;
+      letter-spacing: .6px;
+    }
+
+    .footer p {
+      color: #777;
+      font-size: 10px;
+      margin: 3px 0;
+      line-height: 1.4;
+    }
+
+    .no-fiscal {
+      margin-top: 14px;
+      font-size: 9px;
+      color: #888;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .print-bar {
+      max-width: 800px;
+      margin: 18px auto 0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .print-bar button {
+      border: 0;
+      padding: 11px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .primary {
+      background: #171717;
+      color: white;
+    }
+
+    .secondary-btn {
+      background: #ddd;
+      color: #171717;
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .sheet {
+        margin: 0;
+        max-width: none;
+        border: 0;
+        padding: 0;
+      }
+
+      .print-bar {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .sheet {
+        padding: 20px;
+        margin: 0;
+        border: 0;
+      }
+
+      .header {
+        flex-direction: column;
+      }
+
+      .doc-info {
+        text-align: left;
+      }
+
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="print-bar">
+    <button
+      class="secondary-btn"
+      onclick="window.close()"
+    >
+      Cerrar
+    </button>
+
+    <button
+      class="primary"
+      onclick="window.print()"
+    >
+      Imprimir / Guardar PDF
+    </button>
+  </div>
+
+
+  <div class="sheet">
+
+    <div class="header">
+
+      <div class="brand">
+        <h1>NERÓS</h1>
+        <div class="tag">
+          HACÉ DE TU AROMA TU SELLO PERSONAL
+        </div>
+      </div>
+
+      <div class="doc-info">
+        <div class="type">
+          Comprobante interno de venta
+        </div>
+
+        <div class="number">
+          Nº ${formatoNumeroComprobanteInterno(venta.id)}
+        </div>
+
+        <div class="status">
+          ${escapeReceipt(estadoTexto)}
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="meta-grid">
+
+      <div class="meta">
+        <small>Fecha</small>
+        <strong>${escapeReceipt(formatoFechaHora(venta.created_at))}</strong>
+      </div>
+
+      <div class="meta">
+        <small>Medio de pago</small>
+        <strong>${escapeReceipt(venta.medio_pago || "—")}</strong>
+      </div>
+
+      <div class="meta">
+        <small>Cliente</small>
+        <strong>${escapeReceipt(nombreCliente || "Consumidor final")}</strong>
+      </div>
+
+      <div class="meta">
+        <small>DNI / CUIT</small>
+        <strong>${escapeReceipt(documentoCliente)}</strong>
+      </div>
+
+      <div class="meta">
+        <small>Teléfono</small>
+        <strong>${escapeReceipt(telefonoCliente)}</strong>
+      </div>
+
+      <div class="meta">
+        <small>Comprobante fiscal</small>
+        <strong>${escapeReceipt(comprobanteFiscal)}</strong>
+      </div>
+
+    </div>
+
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th style="text-align:center">Cant.</th>
+          <th style="text-align:right">Precio unit.</th>
+          <th style="text-align:right">Subtotal</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        ${
+          filas ||
+          `
+            <tr>
+              <td colspan="4">
+                No hay productos registrados.
+              </td>
+            </tr>
+          `
+        }
+      </tbody>
+
+    </table>
+
+
+    <div class="totals">
+
+      <div class="line">
+        <span>Subtotal</span>
+        <strong>${formatoDinero(venta.subtotal)}</strong>
+      </div>
+
+      <div class="line">
+        <span>Descuento</span>
+        <strong>${formatoDinero(venta.descuento)}</strong>
+      </div>
+
+      <div class="line final">
+        <span>TOTAL</span>
+        <span>${formatoDinero(venta.total)}</span>
+      </div>
+
+    </div>
+
+
+    ${
+      venta.notas
+        ? `
+          <div class="notes">
+            <strong>Observaciones:</strong><br>
+            ${escapeReceipt(venta.notas)}
+          </div>
+        `
+        : ""
+    }
+
+
+    <div class="footer">
+
+      <strong>
+        Gracias por elegir NERÓS.
+      </strong>
+
+      <p>
+        Hacé de tu aroma tu sello personal.
+      </p>
+
+      <p>
+        Comprobante generado por NERÓS Admin.
+      </p>
+
+      <div class="no-fiscal">
+        Este documento es un comprobante interno de la operación y no reemplaza una factura o comprobante fiscal emitido ante ARCA.
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+    window.addEventListener(
+      "load",
+      () => {
+        document.title =
+          "NERÓS - Comprobante #${formatoNumeroComprobanteInterno(venta.id)}";
+      }
+    );
+  <\/script>
+
+</body>
+</html>
+        `);
+
+
+        ventana.document.close();
+        ventana.focus();
+      };
 
 
     /* =========================
