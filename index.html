@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>NERÓS Admin</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,366 +15,1895 @@
       padding: 0;
     }
 
+    :root {
+      --bg: #0e0e0e;
+      --bg-2: #151515;
+      --bg-3: #1c1c1c;
+      --border: #2a2a2a;
+      --gold: #d6aa59;
+      --gold-2: #b8893e;
+      --text: #f3f3f3;
+      --muted: #929292;
+      --danger: #d45b5b;
+      --success: #64c17c;
+    }
+
     body {
       font-family: Arial, Helvetica, sans-serif;
-      min-height: 100vh;
       background:
-        radial-gradient(circle at top right, rgba(192, 147, 72, 0.16), transparent 35%),
-        linear-gradient(135deg, #111111, #1b1b1b 50%, #0d0d0d);
-      color: #fff;
+        radial-gradient(circle at top right, rgba(214, 170, 89, 0.10), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* LOGIN */
+
+    #loginView {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 24px;
     }
 
-    .login-container {
+    .login-wrap {
       width: 100%;
       max-width: 420px;
     }
 
-    .brand {
+    .login-brand {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 28px;
     }
 
-    .brand h1 {
+    .login-brand h1 {
+      color: var(--gold);
       font-size: 42px;
       letter-spacing: 8px;
-      font-weight: 700;
-      color: #d4af6a;
     }
 
-    .brand p {
-      margin-top: 8px;
-      color: #aaa;
-      font-size: 13px;
+    .login-brand p {
+      color: #b5b5b5;
       letter-spacing: 3px;
+      font-size: 12px;
+      margin-top: 8px;
       text-transform: uppercase;
     }
 
-    .card {
-      background: rgba(20, 20, 20, 0.92);
-      border: 1px solid rgba(212, 175, 106, 0.25);
+    .login-card {
+      background: rgba(20, 20, 20, 0.95);
+      border: 1px solid rgba(214, 170, 89, 0.28);
       border-radius: 20px;
       padding: 32px;
-      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(10px);
+      box-shadow: 0 25px 80px rgba(0,0,0,.45);
     }
 
-    .card h2 {
+    .login-card h2 {
       font-size: 24px;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
-    .subtitle {
-      color: #999;
+    .login-card .subtitle {
+      color: var(--muted);
       font-size: 14px;
-      margin-bottom: 26px;
+      margin-bottom: 24px;
     }
 
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     label {
       display: block;
-      font-size: 13px;
       color: #cfcfcf;
-      margin-bottom: 8px;
+      font-size: 13px;
+      margin-bottom: 7px;
     }
 
-    input {
+    input,
+    select,
+    textarea {
       width: 100%;
-      padding: 14px 15px;
       border: 1px solid #333;
+      background: #141414;
+      color: white;
       border-radius: 10px;
-      background: #151515;
-      color: #fff;
+      padding: 12px 14px;
       outline: none;
-      font-size: 15px;
-      transition: 0.2s;
+      transition: .2s;
     }
 
-    input:focus {
-      border-color: #d4af6a;
-      box-shadow: 0 0 0 3px rgba(212, 175, 106, 0.08);
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(214,170,89,.08);
     }
 
-    button {
-      width: 100%;
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .btn {
       border: 0;
       border-radius: 10px;
-      padding: 14px;
-      font-size: 15px;
+      padding: 11px 16px;
       font-weight: 700;
-      cursor: pointer;
-      background: linear-gradient(135deg, #d4af6a, #b68c43);
-      color: #111;
-      transition: 0.2s;
-      margin-top: 6px;
+      transition: .2s;
     }
 
-    button:hover {
+    .btn:hover {
       transform: translateY(-1px);
       filter: brightness(1.05);
     }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color: #111;
+    }
+
+    .btn-secondary {
+      background: #242424;
+      color: #fff;
+      border: 1px solid #333;
+    }
+
+    .btn-danger {
+      background: rgba(212,91,91,.15);
+      border: 1px solid rgba(212,91,91,.3);
+      color: #ff9696;
+    }
+
+    .login-btn {
+      width: 100%;
+      margin-top: 4px;
+      padding: 14px;
     }
 
     .message {
-      margin-top: 16px;
-      padding: 12px;
+      margin-top: 14px;
+      padding: 11px 12px;
       border-radius: 8px;
       font-size: 13px;
       display: none;
-      line-height: 1.4;
     }
 
     .message.error {
       display: block;
-      background: rgba(255, 72, 72, 0.1);
-      color: #ff8d8d;
-      border: 1px solid rgba(255, 72, 72, 0.25);
+      background: rgba(212,91,91,.12);
+      color: #ff9a9a;
+      border: 1px solid rgba(212,91,91,.25);
     }
 
     .message.success {
       display: block;
-      background: rgba(81, 207, 102, 0.1);
-      color: #91e6a0;
-      border: 1px solid rgba(81, 207, 102, 0.25);
+      background: rgba(100,193,124,.12);
+      color: #98e3aa;
+      border: 1px solid rgba(100,193,124,.25);
     }
 
-    .footer {
-      text-align: center;
-      margin-top: 22px;
+    .login-footer {
       color: #666;
+      text-align: center;
+      margin-top: 18px;
       font-size: 12px;
     }
 
-    #adminPanel {
-      display: none;
-      width: 100%;
-      max-width: 900px;
+    /* APP */
+
+    #appView {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 240px 1fr;
     }
 
-    .admin-box {
-      background: #151515;
-      border: 1px solid rgba(212, 175, 106, 0.25);
-      border-radius: 20px;
-      padding: 32px;
+    .sidebar {
+      background: #111;
+      border-right: 1px solid #242424;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: sticky;
+      top: 0;
     }
 
-    .admin-box h2 {
-      color: #d4af6a;
+    .brand {
+      padding: 6px 12px 30px;
+    }
+
+    .brand h2 {
+      color: var(--gold);
+      letter-spacing: 4px;
+      font-size: 24px;
+    }
+
+    .brand span {
+      color: #666;
+      font-size: 11px;
+      letter-spacing: 2px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      color: #aaa;
+      border: 1px solid transparent;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .nav-btn:hover {
+      background: #181818;
+      color: white;
+    }
+
+    .nav-btn.active {
+      background: rgba(214,170,89,.12);
+      color: var(--gold);
+      border-color: rgba(214,170,89,.18);
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 20px;
+    }
+
+    .user-info {
+      padding: 12px;
+      border: 1px solid #272727;
+      border-radius: 12px;
       margin-bottom: 10px;
     }
 
-    .admin-box p {
-      color: #bbb;
+    .user-info small {
+      display: block;
+      color: #777;
+      margin-bottom: 5px;
+    }
+
+    .user-info span {
+      display: block;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .main {
+      padding: 30px;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      gap: 20px;
+    }
+
+    .topbar h1 {
+      font-size: 28px;
+    }
+
+    .topbar p {
+      color: var(--muted);
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* DASHBOARD */
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card,
+    .panel {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .stat-card {
+      padding: 20px;
+    }
+
+    .stat-card .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .panel {
+      padding: 20px;
       margin-bottom: 20px;
     }
 
-    .logout-btn {
-      width: auto;
-      padding-left: 22px;
-      padding-right: 22px;
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .panel-header h3 {
+      font-size: 18px;
+    }
+
+    /* CLIENTES */
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--bg-2);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 850px;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      text-align: left;
+      border-bottom: 1px solid #252525;
+      font-size: 13px;
+    }
+
+    th {
+      color: #999;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      background: #121212;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover {
+      background: rgba(255,255,255,.02);
+    }
+
+    .actions {
+      display: flex;
+      gap: 7px;
+    }
+
+    .icon-btn {
+      border: 1px solid #333;
+      background: #1b1b1b;
+      color: #ddd;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 12px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #777;
+    }
+
+    /* MODAL */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 20px;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 760px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #151515;
+      border: 1px solid rgba(214,170,89,.25);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 35px 100px rgba(0,0,0,.55);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+      color: var(--gold);
+    }
+
+    .close-btn {
+      background: transparent;
+      border: 0;
+      color: #aaa;
+      font-size: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .loading {
+      color: var(--muted);
+      padding: 18px 0;
+    }
+
+    @media (max-width: 1000px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 780px) {
+      #appView {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        min-height: auto;
+        position: static;
+        border-right: 0;
+        border-bottom: 1px solid #242424;
+      }
+
+      .nav {
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
+      }
+
+      .sidebar-bottom {
+        margin-top: 16px;
+      }
+
+      .main {
+        padding: 20px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid .full {
+        grid-column: auto;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="login-container" id="loginView">
+  <!-- LOGIN -->
+  <section id="loginView">
 
-    <div class="brand">
-      <h1>NERÓS</h1>
-      <p>Administration System</p>
+    <div class="login-wrap">
+
+      <div class="login-brand">
+        <h1>NERÓS</h1>
+        <p>Administration System</p>
+      </div>
+
+      <div class="login-card">
+
+        <h2>Bienvenido</h2>
+        <p class="subtitle">Ingresá para acceder al sistema interno.</p>
+
+        <form id="loginForm">
+
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input
+              id="loginEmail"
+              type="email"
+              placeholder="tu@email.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input
+              id="loginPassword"
+              type="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button class="btn btn-primary login-btn" id="loginBtn">
+            Ingresar
+          </button>
+
+          <div id="loginMessage" class="message"></div>
+
+        </form>
+
+      </div>
+
+      <div class="login-footer">
+        NERÓS © 2026 · Sistema interno
+      </div>
+
     </div>
 
-    <div class="card">
-      <h2>Bienvenido</h2>
-      <p class="subtitle">Ingresá para acceder al sistema interno.</p>
+  </section>
 
-      <form id="loginForm">
 
-        <div class="form-group">
-          <label for="email">Correo electrónico</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="tu@email.com"
-            autocomplete="email"
-            required
-          />
-        </div>
+  <!-- APP -->
+  <section id="appView" class="hidden">
 
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            placeholder="••••••••"
-            autocomplete="current-password"
-            required
-          />
-        </div>
+    <aside class="sidebar">
 
-        <button type="submit" id="loginBtn">
-          Ingresar
+      <div class="brand">
+        <h2>NERÓS</h2>
+        <span>ADMIN SYSTEM</span>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-btn active" data-section="dashboard">
+          Inicio
         </button>
 
-        <div id="message" class="message"></div>
+        <button class="nav-btn" data-section="clientes">
+          Clientes
+        </button>
+
+        <button class="nav-btn" data-section="productos">
+          Productos
+        </button>
+
+        <button class="nav-btn" data-section="nuevaVenta">
+          Nueva venta
+        </button>
+
+        <button class="nav-btn" data-section="ventas">
+          Ventas
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+
+        <div class="user-info">
+          <small>Sesión iniciada</small>
+          <span id="userEmail">—</span>
+        </div>
+
+        <button class="btn btn-secondary" id="logoutBtn" style="width:100%">
+          Cerrar sesión
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <main class="main">
+
+      <div class="topbar">
+
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle">
+            Resumen general de NERÓS.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- DASHBOARD -->
+      <section id="section-dashboard" class="section active">
+
+        <div class="stats-grid">
+
+          <div class="stat-card">
+            <div class="label">Clientes</div>
+            <div class="value" id="statClientes">0</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="label">Productos</div>
+            <div class="value" id="statProductos">0</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="label">Ventas</div>
+            <div class="value" id="statVentas">0</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="label">Facturación total</div>
+            <div class="value" id="statFacturacion">$0</div>
+          </div>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <h3>Estado del sistema</h3>
+          </div>
+
+          <p style="color:#aaa;line-height:1.7">
+            El sistema ya está conectado a Supabase.
+            Desde acá vas a poder gestionar clientes, productos,
+            ventas, stock e historial.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- CLIENTES -->
+      <section id="section-clientes" class="section">
+
+        <div class="toolbar">
+
+          <div class="search-box">
+            <input
+              id="buscarCliente"
+              type="text"
+              placeholder="Buscar por nombre, apellido, DNI o teléfono..."
+            />
+          </div>
+
+          <button class="btn btn-primary" id="nuevoClienteBtn">
+            + Nuevo cliente
+          </button>
+
+        </div>
+
+        <div id="clientesLoading" class="loading hidden">
+          Cargando clientes...
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>DNI</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Localidad</th>
+                <th>Alta</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody id="clientesBody"></tbody>
+
+          </table>
+
+          <div id="clientesEmpty" class="empty hidden">
+            Todavía no hay clientes registrados.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PRODUCTOS -->
+      <section id="section-productos" class="section">
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <h3>Productos</h3>
+          </div>
+
+          <p style="color:#888">
+            En el próximo paso conectamos productos, precios y stock.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- NUEVA VENTA -->
+      <section id="section-nuevaVenta" class="section">
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <h3>Nueva venta</h3>
+          </div>
+
+          <p style="color:#888">
+            Acá vamos a armar el carrito interno y registrar las ventas.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- VENTAS -->
+      <section id="section-ventas" class="section">
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <h3>Historial de ventas</h3>
+          </div>
+
+          <p style="color:#888">
+            Acá vamos a mostrar todas las operaciones realizadas.
+          </p>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </section>
+
+
+  <!-- MODAL CLIENTE -->
+  <div id="clienteModal" class="modal-backdrop hidden">
+
+    <div class="modal">
+
+      <div class="modal-header">
+        <h3 id="clienteModalTitle">Nuevo cliente</h3>
+        <button class="close-btn" id="cerrarClienteModal">×</button>
+      </div>
+
+      <form id="clienteForm">
+
+        <input type="hidden" id="clienteId" />
+
+        <div class="form-grid">
+
+          <div>
+            <label>Nombre *</label>
+            <input id="clienteNombre" required />
+          </div>
+
+          <div>
+            <label>Apellido</label>
+            <input id="clienteApellido" />
+          </div>
+
+          <div>
+            <label>DNI / CUIT</label>
+            <input id="clienteDni" />
+          </div>
+
+          <div>
+            <label>Teléfono / WhatsApp</label>
+            <input id="clienteTelefono" />
+          </div>
+
+          <div>
+            <label>Email</label>
+            <input id="clienteEmail" type="email" />
+          </div>
+
+          <div>
+            <label>Fecha de nacimiento</label>
+            <input id="clienteNacimiento" type="date" />
+          </div>
+
+          <div>
+            <label>Dirección</label>
+            <input id="clienteDireccion" />
+          </div>
+
+          <div>
+            <label>Localidad</label>
+            <input id="clienteLocalidad" />
+          </div>
+
+          <div>
+            <label>Provincia</label>
+            <input id="clienteProvincia" />
+          </div>
+
+          <div>
+            <label>Código postal</label>
+            <input id="clienteCp" />
+          </div>
+
+          <div class="full">
+            <label>Notas</label>
+            <textarea
+              id="clienteNotas"
+              placeholder="Preferencias, observaciones, perfumes favoritos..."
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div id="clienteMessage" class="message"></div>
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="cancelarCliente"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            id="guardarClienteBtn"
+          >
+            Guardar cliente
+          </button>
+
+        </div>
 
       </form>
+
     </div>
 
-    <div class="footer">
-      NERÓS © 2026 · Sistema interno
-    </div>
-
-  </div>
-
-
-  <div id="adminPanel">
-    <div class="admin-box">
-      <h2>NERÓS ADMIN</h2>
-      <p>Inicio de sesión correcto. El dashboard se va a construir acá.</p>
-
-      <button class="logout-btn" id="logoutBtn">
-        Cerrar sesión
-      </button>
-    </div>
   </div>
 
 
   <script>
-    const SUPABASE_URL = "https://zekjtgjtjzfntkdcgrvs.supabase.co";
+
+    /* =========================
+       SUPABASE
+    ========================= */
+
+    const SUPABASE_URL =
+      "https://zekjtgjtjzfntkdcgrvs.supabase.co";
 
     const SUPABASE_KEY =
       "sb_publishable_40mNTAv6a6Su10l5UMTXEQ_pRcIUjL5";
 
-    const supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    /* =========================
+       ELEMENTOS
+    ========================= */
+
+    const loginView =
+      document.getElementById("loginView");
+
+    const appView =
+      document.getElementById("appView");
+
+    const loginForm =
+      document.getElementById("loginForm");
+
+    const loginEmail =
+      document.getElementById("loginEmail");
+
+    const loginPassword =
+      document.getElementById("loginPassword");
+
+    const loginBtn =
+      document.getElementById("loginBtn");
+
+    const loginMessage =
+      document.getElementById("loginMessage");
+
+    const logoutBtn =
+      document.getElementById("logoutBtn");
+
+    const userEmail =
+      document.getElementById("userEmail");
+
+    const navButtons =
+      document.querySelectorAll(".nav-btn");
+
+    const sections =
+      document.querySelectorAll(".section");
+
+    const pageTitle =
+      document.getElementById("pageTitle");
+
+    const pageSubtitle =
+      document.getElementById("pageSubtitle");
+
+
+    /* CLIENTES */
+
+    const clientesBody =
+      document.getElementById("clientesBody");
+
+    const clientesEmpty =
+      document.getElementById("clientesEmpty");
+
+    const clientesLoading =
+      document.getElementById("clientesLoading");
+
+    const buscarCliente =
+      document.getElementById("buscarCliente");
+
+    const nuevoClienteBtn =
+      document.getElementById("nuevoClienteBtn");
+
+    const clienteModal =
+      document.getElementById("clienteModal");
+
+    const cerrarClienteModal =
+      document.getElementById("cerrarClienteModal");
+
+    const cancelarCliente =
+      document.getElementById("cancelarCliente");
+
+    const clienteForm =
+      document.getElementById("clienteForm");
+
+    const clienteModalTitle =
+      document.getElementById("clienteModalTitle");
+
+    const clienteMessage =
+      document.getElementById("clienteMessage");
+
+    const guardarClienteBtn =
+      document.getElementById("guardarClienteBtn");
+
+
+    let clientesCache = [];
+
+
+    /* =========================
+       HELPERS
+    ========================= */
+
+    function formatoDinero(valor) {
+
+      return new Intl.NumberFormat(
+        "es-AR",
+        {
+          style: "currency",
+          currency: "ARS",
+          maximumFractionDigits: 0
+        }
+      ).format(Number(valor || 0));
+
+    }
+
+
+    function formatoFecha(fecha) {
+
+      if (!fecha) return "—";
+
+      return new Date(fecha).toLocaleDateString(
+        "es-AR"
+      );
+
+    }
+
+
+    function mostrarMensaje(
+      elemento,
+      texto,
+      tipo
+    ) {
+
+      elemento.textContent = texto;
+      elemento.className =
+        "message " + tipo;
+
+    }
+
+
+    function limpiarMensaje(elemento) {
+
+      elemento.textContent = "";
+      elemento.className = "message";
+
+    }
+
+
+    /* =========================
+       LOGIN
+    ========================= */
+
+    loginForm.addEventListener(
+      "submit",
+      async (event) => {
+
+        event.preventDefault();
+
+        limpiarMensaje(loginMessage);
+
+        loginBtn.disabled = true;
+        loginBtn.textContent =
+          "Ingresando...";
+
+        const { data, error } =
+          await supabaseClient.auth
+            .signInWithPassword({
+              email:
+                loginEmail.value.trim(),
+
+              password:
+                loginPassword.value
+            });
+
+
+        if (error) {
+
+          mostrarMensaje(
+            loginMessage,
+            "Correo o contraseña incorrectos.",
+            "error"
+          );
+
+        } else {
+
+          iniciarApp(data.user);
+
+        }
+
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Ingresar";
+
+      }
     );
 
 
-    const loginView = document.getElementById("loginView");
-    const adminPanel = document.getElementById("adminPanel");
+    logoutBtn.addEventListener(
+      "click",
+      async () => {
 
-    const loginForm = document.getElementById("loginForm");
-    const loginBtn = document.getElementById("loginBtn");
+        await supabaseClient.auth.signOut();
 
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
+        appView.classList.add("hidden");
 
-    const message = document.getElementById("message");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-
-    function mostrarLogin() {
-      loginView.style.display = "block";
-      adminPanel.style.display = "none";
-    }
-
-
-    function mostrarAdmin() {
-      loginView.style.display = "none";
-      adminPanel.style.display = "block";
-    }
-
-
-    function mostrarMensaje(texto, tipo = "error") {
-      message.textContent = texto;
-      message.className = "message " + tipo;
-    }
-
-
-    function limpiarMensaje() {
-      message.textContent = "";
-      message.className = "message";
-    }
-
-
-    loginForm.addEventListener("submit", async (event) => {
-
-      event.preventDefault();
-
-      limpiarMensaje();
-
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-
-      loginBtn.disabled = true;
-      loginBtn.textContent = "Ingresando...";
-
-
-      const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-          email,
-          password
-        });
-
-
-      if (error) {
-
-        console.error(error);
-
-        mostrarMensaje(
-          "No pudimos iniciar sesión. Revisá el correo y la contraseña.",
-          "error"
+        loginView.classList.remove(
+          "hidden"
         );
 
-      } else {
+        loginPassword.value = "";
 
-        mostrarMensaje(
-          "Inicio de sesión correcto.",
-          "success"
-        );
-
-        setTimeout(() => {
-          mostrarAdmin();
-        }, 500);
       }
-
-
-      loginBtn.disabled = false;
-      loginBtn.textContent = "Ingresar";
-
-    });
-
-
-    logoutBtn.addEventListener("click", async () => {
-
-      await supabaseClient.auth.signOut();
-
-      emailInput.value = "";
-      passwordInput.value = "";
-
-      mostrarLogin();
-
-    });
+    );
 
 
     async function verificarSesion() {
 
       const {
         data: { session }
-      } = await supabaseClient.auth.getSession();
+      } =
+        await supabaseClient.auth
+          .getSession();
 
       if (session) {
-        mostrarAdmin();
-      } else {
-        mostrarLogin();
+
+        iniciarApp(session.user);
+
       }
 
     }
 
+
+    async function iniciarApp(user) {
+
+      loginView.classList.add("hidden");
+      appView.classList.remove("hidden");
+
+      userEmail.textContent =
+        user?.email || "Usuario";
+
+      await cargarDashboard();
+      await cargarClientes();
+
+    }
+
+
+    /* =========================
+       NAVEGACIÓN
+    ========================= */
+
+    const infoSecciones = {
+
+      dashboard: {
+        titulo: "Dashboard",
+        subtitulo:
+          "Resumen general de NERÓS."
+      },
+
+      clientes: {
+        titulo: "Clientes",
+        subtitulo:
+          "Registro e historial de clientes."
+      },
+
+      productos: {
+        titulo: "Productos",
+        subtitulo:
+          "Catálogo, costos, precios y stock."
+      },
+
+      nuevaVenta: {
+        titulo: "Nueva venta",
+        subtitulo:
+          "Registrar una nueva operación."
+      },
+
+      ventas: {
+        titulo: "Ventas",
+        subtitulo:
+          "Historial de operaciones realizadas."
+      }
+
+    };
+
+
+    navButtons.forEach(btn => {
+
+      btn.addEventListener(
+        "click",
+        async () => {
+
+          navButtons.forEach(
+            x => x.classList.remove("active")
+          );
+
+          btn.classList.add("active");
+
+          const section =
+            btn.dataset.section;
+
+          sections.forEach(
+            x => x.classList.remove("active")
+          );
+
+          document
+            .getElementById(
+              "section-" + section
+            )
+            .classList.add("active");
+
+          pageTitle.textContent =
+            infoSecciones[section].titulo;
+
+          pageSubtitle.textContent =
+            infoSecciones[section].subtitulo;
+
+
+          if (section === "dashboard") {
+            await cargarDashboard();
+          }
+
+          if (section === "clientes") {
+            await cargarClientes();
+          }
+
+        }
+      );
+
+    });
+
+
+    /* =========================
+       DASHBOARD
+    ========================= */
+
+    async function cargarDashboard() {
+
+      const [
+        clientesResult,
+        productosResult,
+        ventasResult
+      ] = await Promise.all([
+
+        supabaseClient
+          .from("clientes")
+          .select("*", {
+            count: "exact",
+            head: true
+          }),
+
+        supabaseClient
+          .from("productos")
+          .select("*", {
+            count: "exact",
+            head: true
+          }),
+
+        supabaseClient
+          .from("ventas")
+          .select("total")
+
+      ]);
+
+
+      document.getElementById(
+        "statClientes"
+      ).textContent =
+        clientesResult.count || 0;
+
+
+      document.getElementById(
+        "statProductos"
+      ).textContent =
+        productosResult.count || 0;
+
+
+      const ventas =
+        ventasResult.data || [];
+
+
+      document.getElementById(
+        "statVentas"
+      ).textContent =
+        ventas.length;
+
+
+      const totalFacturado =
+        ventas.reduce(
+          (acc, venta) =>
+            acc + Number(venta.total || 0),
+          0
+        );
+
+
+      document.getElementById(
+        "statFacturacion"
+      ).textContent =
+        formatoDinero(totalFacturado);
+
+    }
+
+
+    /* =========================
+       CLIENTES
+    ========================= */
+
+    async function cargarClientes() {
+
+      clientesLoading.classList.remove(
+        "hidden"
+      );
+
+      const { data, error } =
+        await supabaseClient
+          .from("clientes")
+          .select("*")
+          .order("created_at", {
+            ascending: false
+          });
+
+
+      clientesLoading.classList.add(
+        "hidden"
+      );
+
+
+      if (error) {
+
+        console.error(error);
+
+        alert(
+          "No se pudieron cargar los clientes."
+        );
+
+        return;
+      }
+
+
+      clientesCache = data || [];
+
+      renderClientes(clientesCache);
+
+    }
+
+
+    function renderClientes(clientes) {
+
+      clientesBody.innerHTML = "";
+
+      clientesEmpty.classList.toggle(
+        "hidden",
+        clientes.length !== 0
+      );
+
+
+      clientes.forEach(cliente => {
+
+        const tr =
+          document.createElement("tr");
+
+        tr.innerHTML = `
+
+          <td>
+            <strong>
+              ${escapeHtml(
+                cliente.nombre || ""
+              )}
+              ${escapeHtml(
+                cliente.apellido || ""
+              )}
+            </strong>
+          </td>
+
+          <td>
+            ${escapeHtml(
+              cliente.dni || "—"
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              cliente.telefono || "—"
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              cliente.email || "—"
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              cliente.localidad || "—"
+            )}
+          </td>
+
+          <td>
+            ${formatoFecha(
+              cliente.created_at
+            )}
+          </td>
+
+          <td>
+
+            <div class="actions">
+
+              <button
+                class="icon-btn"
+                onclick="editarCliente(
+                  ${cliente.id}
+                )"
+              >
+                Editar
+              </button>
+
+              <button
+                class="icon-btn"
+                onclick="eliminarCliente(
+                  ${cliente.id}
+                )"
+              >
+                Eliminar
+              </button>
+
+            </div>
+
+          </td>
+
+        `;
+
+        clientesBody.appendChild(tr);
+
+      });
+
+    }
+
+
+    buscarCliente.addEventListener(
+      "input",
+      () => {
+
+        const q =
+          buscarCliente.value
+            .toLowerCase()
+            .trim();
+
+        if (!q) {
+
+          renderClientes(clientesCache);
+
+          return;
+        }
+
+
+        const filtrados =
+          clientesCache.filter(c => {
+
+            const texto = `
+              ${c.nombre || ""}
+              ${c.apellido || ""}
+              ${c.dni || ""}
+              ${c.telefono || ""}
+              ${c.email || ""}
+            `.toLowerCase();
+
+            return texto.includes(q);
+
+          });
+
+
+        renderClientes(filtrados);
+
+      }
+    );
+
+
+    nuevoClienteBtn.addEventListener(
+      "click",
+      () => {
+
+        abrirClienteModal();
+
+      }
+    );
+
+
+    cerrarClienteModal.addEventListener(
+      "click",
+      cerrarModalCliente
+    );
+
+
+    cancelarCliente.addEventListener(
+      "click",
+      cerrarModalCliente
+    );
+
+
+    clienteModal.addEventListener(
+      "click",
+      (event) => {
+
+        if (
+          event.target === clienteModal
+        ) {
+          cerrarModalCliente();
+        }
+
+      }
+    );
+
+
+    function abrirClienteModal(cliente = null) {
+
+      clienteForm.reset();
+
+      limpiarMensaje(clienteMessage);
+
+      document.getElementById(
+        "clienteId"
+      ).value =
+        cliente?.id || "";
+
+
+      document.getElementById(
+        "clienteNombre"
+      ).value =
+        cliente?.nombre || "";
+
+
+      document.getElementById(
+        "clienteApellido"
+      ).value =
+        cliente?.apellido || "";
+
+
+      document.getElementById(
+        "clienteDni"
+      ).value =
+        cliente?.dni || "";
+
+
+      document.getElementById(
+        "clienteTelefono"
+      ).value =
+        cliente?.telefono || "";
+
+
+      document.getElementById(
+        "clienteEmail"
+      ).value =
+        cliente?.email || "";
+
+
+      document.getElementById(
+        "clienteNacimiento"
+      ).value =
+        cliente?.fecha_nacimiento || "";
+
+
+      document.getElementById(
+        "clienteDireccion"
+      ).value =
+        cliente?.direccion || "";
+
+
+      document.getElementById(
+        "clienteLocalidad"
+      ).value =
+        cliente?.localidad || "";
+
+
+      document.getElementById(
+        "clienteProvincia"
+      ).value =
+        cliente?.provincia || "";
+
+
+      document.getElementById(
+        "clienteCp"
+      ).value =
+        cliente?.codigo_postal || "";
+
+
+      document.getElementById(
+        "clienteNotas"
+      ).value =
+        cliente?.notas || "";
+
+
+      clienteModalTitle.textContent =
+        cliente
+          ? "Editar cliente"
+          : "Nuevo cliente";
+
+
+      guardarClienteBtn.textContent =
+        cliente
+          ? "Guardar cambios"
+          : "Guardar cliente";
+
+
+      clienteModal.classList.remove(
+        "hidden"
+      );
+
+    }
+
+
+    function cerrarModalCliente() {
+
+      clienteModal.classList.add(
+        "hidden"
+      );
+
+      clienteForm.reset();
+
+    }
+
+
+    window.editarCliente =
+      function(id) {
+
+        const cliente =
+          clientesCache.find(
+            c => c.id === id
+          );
+
+        if (!cliente) return;
+
+        abrirClienteModal(cliente);
+
+      };
+
+
+    window.eliminarCliente =
+      async function(id) {
+
+        const cliente =
+          clientesCache.find(
+            c => c.id === id
+          );
+
+        if (!cliente) return;
+
+
+        const nombreCompleto =
+          `${cliente.nombre || ""} ${cliente.apellido || ""}`
+          .trim();
+
+
+        const confirmar =
+          confirm(
+            `¿Eliminar a ${nombreCompleto}?`
+          );
+
+
+        if (!confirmar) return;
+
+
+        const { error } =
+          await supabaseClient
+            .from("clientes")
+            .delete()
+            .eq("id", id);
+
+
+        if (error) {
+
+          alert(
+            "No se pudo eliminar el cliente."
+          );
+
+          console.error(error);
+
+          return;
+        }
+
+
+        await cargarClientes();
+        await cargarDashboard();
+
+      };
+
+
+    clienteForm.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        limpiarMensaje(clienteMessage);
+
+        guardarClienteBtn.disabled =
+          true;
+
+        guardarClienteBtn.textContent =
+          "Guardando...";
+
+
+        const id =
+          document.getElementById(
+            "clienteId"
+          ).value;
+
+
+        const datos = {
+
+          nombre:
+            document.getElementById(
+              "clienteNombre"
+            ).value.trim(),
+
+          apellido:
+            document.getElementById(
+              "clienteApellido"
+            ).value.trim(),
+
+          dni:
+            document.getElementById(
+              "clienteDni"
+            ).value.trim(),
+
+          telefono:
+            document.getElementById(
+              "clienteTelefono"
+            ).value.trim(),
+
+          email:
+            document.getElementById(
+              "clienteEmail"
+            ).value.trim(),
+
+          fecha_nacimiento:
+            document.getElementById(
+              "clienteNacimiento"
+            ).value || null,
+
+          direccion:
+            document.getElementById(
+              "clienteDireccion"
+            ).value.trim(),
+
+          localidad:
+            document.getElementById(
+              "clienteLocalidad"
+            ).value.trim(),
+
+          provincia:
+            document.getElementById(
+              "clienteProvincia"
+            ).value.trim(),
+
+          codigo_postal:
+            document.getElementById(
+              "clienteCp"
+            ).value.trim(),
+
+          notas:
+            document.getElementById(
+              "clienteNotas"
+            ).value.trim()
+
+        };
+
+
+        let resultado;
+
+
+        if (id) {
+
+          resultado =
+            await supabaseClient
+              .from("clientes")
+              .update(datos)
+              .eq("id", id);
+
+        } else {
+
+          resultado =
+            await supabaseClient
+              .from("clientes")
+              .insert([datos]);
+
+        }
+
+
+        guardarClienteBtn.disabled =
+          false;
+
+        guardarClienteBtn.textContent =
+          id
+            ? "Guardar cambios"
+            : "Guardar cliente";
+
+
+        if (resultado.error) {
+
+          console.error(
+            resultado.error
+          );
+
+          mostrarMensaje(
+            clienteMessage,
+            "No se pudo guardar el cliente.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        mostrarMensaje(
+          clienteMessage,
+          "Cliente guardado correctamente.",
+          "success"
+        );
+
+
+        await cargarClientes();
+        await cargarDashboard();
+
+
+        setTimeout(
+          cerrarModalCliente,
+          500
+        );
+
+      }
+    );
+
+
+    function escapeHtml(texto) {
+
+      return String(texto)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    }
+
+
+    /* =========================
+       INICIO
+    ========================= */
 
     verificarSesion();
 
