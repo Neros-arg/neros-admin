@@ -2974,6 +2974,13 @@
       }
     }
 
+    .field-hint {
+      margin-top: 6px;
+      color: #6f6f6f;
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
   </style>
 </head>
 
@@ -9493,6 +9500,39 @@
     }
 
 
+    /*
+      LOGO DEL COMPROBANTE
+      Pegá acá el link público de tu logo PNG/SVG cuando quieras usarlo.
+      Ejemplo:
+      const NEROS_LOGO_URL = "https://.../logo.png";
+    */
+    const NEROS_LOGO_URL = "";
+
+
+    function logoComprobanteHtml() {
+
+      if (!NEROS_LOGO_URL) {
+        return `
+          <div class="brand-text-logo">
+            NERÓS
+          </div>
+        `;
+      }
+
+      return `
+        <img
+          class="brand-logo-img"
+          src="${escapeReceipt(NEROS_LOGO_URL)}"
+          alt="NERÓS"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+        />
+        <div class="brand-text-logo" style="display:none">
+          NERÓS
+        </div>
+      `;
+    }
+
+
     window.imprimirComprobanteVenta =
       async function(id) {
 
@@ -9797,7 +9837,22 @@
       border-bottom: 1px solid rgba(183,138,61,.55);
     }
 
-    .brand h1 {
+    .brand-logo-wrap {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+    }
+
+    .brand-logo-img {
+      display: block;
+      max-width: 230px;
+      max-height: 66px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .brand-text-logo {
       margin: 0;
       color: #111;
       font-size: 43px;
@@ -9805,6 +9860,7 @@
       letter-spacing: 10px;
       font-weight: 900;
     }
+
 
     .brand .tag {
       margin-top: 11px;
@@ -9898,15 +9954,15 @@
       place-items: center;
       border-radius: 8px;
       background: var(--dark);
-      color: #d6aa59;
+      color: #ffffff;
       border: 1px solid #2c2c2c;
       font-size: 15px;
       font-weight: 800;
     }
 
-    .meta:nth-child(1)::before { content: "□"; }
+    .meta:nth-child(1)::before { content: "◷"; }
     .meta:nth-child(2)::before { content: "$"; }
-    .meta:nth-child(3)::before { content: "○"; }
+    .meta:nth-child(3)::before { content: "●"; font-size: 9px; }
     .meta:nth-child(4)::before { content: "ID"; font-size: 8px; }
     .meta:nth-child(5)::before { content: "☎"; }
     .meta:nth-child(6)::before { content: "≡"; }
@@ -9938,7 +9994,7 @@
 
     thead th {
       padding: 11px 12px;
-      color: #e5b75f;
+      color: #ffffff;
       background: #171717;
       border: 0;
       font-size: 8px;
@@ -9974,9 +10030,9 @@
     }
 
     .product-thumb {
-      width: 50px;
-      height: 56px;
-      flex: 0 0 50px;
+      width: 58px;
+      height: 64px;
+      flex: 0 0 58px;
       display: grid;
       place-items: center;
       overflow: hidden;
@@ -10181,9 +10237,14 @@
         text-align: left;
       }
 
-      .brand h1 {
+      .brand-text-logo {
         font-size: 31px;
         letter-spacing: 7px;
+      }
+
+      .brand-logo-img {
+        max-width: 190px;
+        max-height: 58px;
       }
 
       .meta-grid {
@@ -10249,7 +10310,10 @@
     <div class="header">
 
       <div class="brand">
-        <h1>NERÓS</h1>
+        <div class="brand-logo-wrap">
+          ${logoComprobanteHtml()}
+        </div>
+
         <div class="tag">
           HACÉ DE TU AROMA TU SELLO PERSONAL
         </div>
