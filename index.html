@@ -13,6 +13,7 @@
 
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
   <style>
     * {
@@ -2005,6 +2006,966 @@
       }
     }
 
+
+    /* STOCK + RENTABILIDAD SIN TABLAS NUEVAS */
+    .profit-grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+    .profit-card {
+      background:#151515;
+      border:1px solid rgba(255,255,255,.075);
+      border-radius:15px;
+      padding:16px;
+    }
+    .profit-card small {
+      color:#7d7d7d;
+      text-transform:uppercase;
+      letter-spacing:.7px;
+      font-size:9px;
+      display:block;
+      margin-bottom:7px;
+    }
+    .profit-card strong {
+      font-size:22px;
+      color:var(--gold);
+    }
+    .profit-card .secondary {
+      color:#858585;
+      margin-top:5px;
+      font-size:10px;
+    }
+    .profit-badge {
+      display:inline-flex;
+      padding:5px 8px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:11px;
+      background:rgba(100,193,124,.10);
+      border:1px solid rgba(100,193,124,.24);
+      color:#98e3aa;
+    }
+    .profit-badge.negative {
+      background:rgba(212,91,91,.10);
+      border-color:rgba(212,91,91,.24);
+      color:#ff9696;
+    }
+    @media(max-width:900px){
+      .profit-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+    @media(max-width:820px){
+      .profit-grid{grid-template-columns:1fr;}
+      #section-stock .table-wrap{
+        border:0;background:transparent;overflow:visible;box-shadow:none;
+      }
+      #section-stock table{min-width:0!important;display:block}
+      #section-stock thead{display:none}
+      #section-stock tbody{display:grid;gap:10px}
+      #section-stock tr{
+        display:block;background:#151515;border:1px solid rgba(255,255,255,.075);
+        border-radius:15px;padding:12px;
+      }
+      #section-stock td{
+        display:flex;justify-content:space-between;gap:12px;border:0;
+        border-bottom:1px solid rgba(255,255,255,.055);padding:9px 0;text-align:right;
+      }
+      #section-stock td:last-child{border-bottom:0}
+      #section-stock td::before{
+        color:#707070;text-transform:uppercase;letter-spacing:.6px;
+        font-size:9px;font-weight:800;text-align:left;flex:0 0 92px;
+      }
+      #section-stock td:nth-child(1)::before{content:"Producto"}
+      #section-stock td:nth-child(2)::before{content:"Código"}
+      #section-stock td:nth-child(3)::before{content:"Costo"}
+      #section-stock td:nth-child(4)::before{content:"Efectivo"}
+      #section-stock td:nth-child(5)::before{content:"Ganancia/u."}
+      #section-stock td:nth-child(6)::before{content:"Margen"}
+      #section-stock td:nth-child(7)::before{content:"Stock"}
+      #section-stock td:nth-child(8)::before{content:"Acción"}
+    }
+
+
+    /* =====================================================
+       V5 ANALYTICS
+    ====================================================== */
+
+    .analytics-periods {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .analytics-periods button {
+      border:1px solid #333;
+      background:#171717;
+      color:#aaa;
+      padding:9px 13px;
+      border-radius:10px;
+      font-weight:800;
+      font-size:12px;
+    }
+
+    .analytics-periods button.active {
+      background:rgba(214,170,89,.12);
+      border-color:rgba(214,170,89,.28);
+      color:var(--gold);
+    }
+
+    .analytics-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .chart-card {
+      background:#151515;
+      border:1px solid rgba(255,255,255,.075);
+      border-radius:16px;
+      padding:18px;
+    }
+
+    .chart-card h3 {
+      font-size:16px;
+      margin-bottom:12px;
+    }
+
+    .chart-wrap {
+      width:100%;
+      min-height:280px;
+      position:relative;
+    }
+
+    .analytics-actions {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-left:auto;
+    }
+
+    .analytics-toolbar {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .analytics-toolbar .search-box {
+      flex:1;
+      min-width:260px;
+    }
+
+    .global-results {
+      margin-top:8px;
+      border:1px solid #303030;
+      border-radius:12px;
+      background:#121212;
+      overflow:hidden;
+      max-height:360px;
+      overflow-y:auto;
+    }
+
+    .global-result-item {
+      padding:11px 12px;
+      border-bottom:1px solid #242424;
+      cursor:pointer;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+
+    .global-result-item:last-child {
+      border-bottom:0;
+    }
+
+    .global-result-item:hover {
+      background:#1b1b1b;
+    }
+
+    .global-result-item small {
+      display:block;
+      color:#777;
+      margin-top:3px;
+      font-size:10px;
+    }
+
+    .global-tag {
+      display:inline-flex;
+      padding:4px 7px;
+      border-radius:999px;
+      font-size:9px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.5px;
+      background:rgba(214,170,89,.10);
+      color:var(--gold);
+      border:1px solid rgba(214,170,89,.2);
+      white-space:nowrap;
+    }
+
+    @media (max-width:900px) {
+      .analytics-grid {
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width:820px) {
+      .analytics-toolbar {
+        display:block;
+      }
+
+      .analytics-toolbar .search-box {
+        min-width:100%;
+      }
+
+      .analytics-actions {
+        margin-top:10px;
+      }
+
+      .analytics-actions .btn {
+        width:100%;
+      }
+
+      .chart-wrap {
+        min-height:240px;
+      }
+    }
+
+
+    /* =====================================================
+       V6 CLIENTES PRO + WHATSAPP
+    ====================================================== */
+
+    .vip-badge {
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      padding:5px 8px;
+      border-radius:999px;
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.4px;
+      background:rgba(214,170,89,.11);
+      color:var(--gold);
+      border:1px solid rgba(214,170,89,.22);
+      white-space:nowrap;
+    }
+
+    .vip-badge.gold {
+      background:linear-gradient(135deg, rgba(214,170,89,.18), rgba(184,137,62,.10));
+      box-shadow:0 5px 20px rgba(214,170,89,.10);
+    }
+
+    .whatsapp-btn {
+      border-color:rgba(100,193,124,.28)!important;
+      color:#98e3aa!important;
+      background:rgba(100,193,124,.08)!important;
+    }
+
+    .client-rank-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .client-rank-item {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      padding:12px;
+      border:1px solid rgba(255,255,255,.07);
+      background:#121212;
+      border-radius:12px;
+    }
+
+    .client-rank-item strong {
+      display:block;
+      font-size:13px;
+    }
+
+    .client-rank-item small {
+      display:block;
+      color:#777;
+      font-size:10px;
+      margin-top:3px;
+    }
+
+    .client-rank-item .amount {
+      color:var(--gold);
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .post-sale-box {
+      margin-top:14px;
+      border:1px solid rgba(100,193,124,.22);
+      background:rgba(100,193,124,.06);
+      border-radius:14px;
+      padding:13px;
+    }
+
+    .post-sale-box strong {
+      display:block;
+      color:#98e3aa;
+      margin-bottom:9px;
+      font-size:13px;
+    }
+
+    .post-sale-actions {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .client-insights {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    .client-insight {
+      background:#121212;
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:12px;
+      padding:12px;
+    }
+
+    .client-insight small {
+      display:block;
+      color:#777;
+      font-size:9px;
+      text-transform:uppercase;
+      letter-spacing:.6px;
+      margin-bottom:5px;
+    }
+
+    .client-insight strong {
+      color:#eee;
+      font-size:14px;
+    }
+
+    @media(max-width:820px){
+      .client-rank-grid,
+      .client-insights,
+      .post-sale-actions {
+        grid-template-columns:1fr;
+      }
+
+      .post-sale-actions .btn {
+        width:100%;
+      }
+    }
+
+
+    /* =====================================================
+       V7 DASHBOARD — DISTRIBUCIÓN PREMIUM / MINIMAL
+    ====================================================== */
+
+    .hero-search-row {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .hero-search-row .search-box {
+      flex:1;
+      min-width:0;
+    }
+
+    .hero-search-row input {
+      min-height:52px;
+      font-size:15px;
+      border-radius:14px;
+      padding-left:16px;
+    }
+
+    .dashboard-periods-v7 {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .dashboard-periods-v7 button {
+      border:1px solid #333;
+      background:#171717;
+      color:#aaa;
+      padding:9px 14px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:12px;
+      cursor:pointer;
+    }
+
+    .dashboard-periods-v7 button.active {
+      color:var(--gold);
+      border-color:rgba(214,170,89,.45);
+      background:rgba(214,170,89,.12);
+    }
+
+    .dashboard-kpis-v7 {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .dashboard-kpi-v7 {
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-height:116px;
+      padding:16px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.018), transparent 50%),
+        #151515;
+      border:1px solid rgba(255,255,255,.075);
+      border-radius:16px;
+    }
+
+    .dashboard-kpi-icon {
+      width:50px;
+      height:50px;
+      flex:0 0 50px;
+      display:grid;
+      place-items:center;
+      border-radius:13px;
+      background:rgba(214,170,89,.10);
+      border:1px solid rgba(214,170,89,.18);
+      color:var(--gold);
+      font-size:24px;
+      font-weight:900;
+    }
+
+    .dashboard-kpi-v7 small {
+      display:block;
+      color:#8a8a8a;
+      text-transform:uppercase;
+      letter-spacing:.6px;
+      font-size:9px;
+      margin-bottom:5px;
+    }
+
+    .dashboard-kpi-v7 strong {
+      display:block;
+      color:#f3f3f3;
+      font-size:25px;
+      letter-spacing:-.5px;
+    }
+
+    .dashboard-kpi-v7 span {
+      display:block;
+      margin-top:5px;
+      color:#666;
+      font-size:9px;
+    }
+
+    .dashboard-main-v7 {
+      display:grid;
+      grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);
+      gap:14px;
+      align-items:stretch;
+      margin-bottom:16px;
+    }
+
+    .dashboard-chart-card-v7,
+    .dashboard-top-card-v7 {
+      background:#151515;
+      border:1px solid rgba(255,255,255,.075);
+      border-radius:16px;
+      padding:17px;
+    }
+
+    .dashboard-card-head-v7 {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .dashboard-card-head-v7 h3 {
+      font-size:16px;
+      margin:0;
+    }
+
+    .dashboard-card-head-v7 button {
+      border:0;
+      background:transparent;
+      color:var(--gold);
+      font-size:11px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .dashboard-chart-wrap-v7 {
+      width:100%;
+      min-height:315px;
+      position:relative;
+    }
+
+    .dashboard-top-list-v7 {
+      display:grid;
+      gap:8px;
+    }
+
+    .dashboard-top-item-v7 {
+      display:grid;
+      grid-template-columns:34px minmax(0,1fr) auto;
+      gap:10px;
+      align-items:center;
+      padding:10px 0;
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .dashboard-top-item-v7:last-child {
+      border-bottom:0;
+    }
+
+    .dashboard-rank-v7 {
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:rgba(214,170,89,.10);
+      color:var(--gold);
+      font-weight:900;
+      font-size:11px;
+    }
+
+    .dashboard-top-item-v7 strong {
+      display:block;
+      color:#eee;
+      font-size:12px;
+    }
+
+    .dashboard-top-item-v7 small {
+      display:block;
+      color:#777;
+      font-size:9px;
+      margin-top:3px;
+    }
+
+    .dashboard-top-item-v7 .amount {
+      color:#ddd;
+      font-size:11px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .dashboard-secondary-v7 {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .dashboard-simple-card-v7 {
+      background:#151515;
+      border:1px solid rgba(255,255,255,.075);
+      border-radius:16px;
+      padding:16px;
+    }
+
+    .dashboard-simple-list-v7 {
+      display:grid;
+      gap:8px;
+    }
+
+    .dashboard-simple-item-v7 {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      padding:9px 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .dashboard-simple-item-v7:last-child {
+      border-bottom:0;
+    }
+
+    .dashboard-simple-item-v7 strong {
+      font-size:11px;
+    }
+
+    .dashboard-simple-item-v7 small {
+      display:block;
+      color:#777;
+      font-size:9px;
+      margin-top:3px;
+    }
+
+    .dashboard-simple-item-v7 .right {
+      color:var(--gold);
+      font-size:11px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .dashboard-advanced-v7 {
+      margin-top:14px;
+      display:none;
+    }
+
+    .dashboard-advanced-v7.open {
+      display:block;
+    }
+
+    .dashboard-tools-v7 {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    @media(max-width:1050px){
+      .dashboard-kpis-v7 {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .dashboard-main-v7 {
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:820px){
+      /* Hide old dashboard content completely on mobile */
+      #section-dashboard > .analytics-toolbar,
+      #section-dashboard > .analytics-periods:not(.dashboard-periods-v7),
+      #section-dashboard > .stats-grid.stats-8,
+      #section-dashboard > .dashboard-grid,
+      #section-dashboard > .analytics-grid {
+        display:none !important;
+      }
+
+      .hero-search-row {
+        display:block;
+      }
+
+      .hero-search-row .search-box {
+        width:100%;
+      }
+
+      .dashboard-periods-v7 {
+        overflow-x:auto;
+        flex-wrap:nowrap;
+        padding-bottom:2px;
+      }
+
+      .dashboard-periods-v7 button {
+        flex:0 0 auto;
+      }
+
+      .dashboard-kpis-v7 {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:8px;
+      }
+
+      .dashboard-kpi-v7 {
+        min-height:100px;
+        padding:13px;
+        gap:10px;
+      }
+
+      .dashboard-kpi-icon {
+        width:42px;
+        height:42px;
+        flex-basis:42px;
+        font-size:20px;
+      }
+
+      .dashboard-kpi-v7 strong {
+        font-size:20px;
+      }
+
+      .dashboard-main-v7 {
+        grid-template-columns:1fr;
+        gap:10px;
+      }
+
+      .dashboard-chart-card-v7,
+      .dashboard-top-card-v7,
+      .dashboard-simple-card-v7 {
+        padding:14px;
+        box-shadow:none;
+      }
+
+      .dashboard-chart-wrap-v7 {
+        min-height:245px;
+      }
+
+      .dashboard-secondary-v7 {
+        grid-template-columns:1fr;
+        gap:10px;
+      }
+
+      .dashboard-tools-v7 {
+        display:grid;
+        grid-template-columns:1fr;
+      }
+
+      .dashboard-tools-v7 .btn {
+        width:100%;
+      }
+    }
+
+    @media(max-width:420px){
+      .dashboard-kpis-v7 {
+        grid-template-columns:1fr 1fr;
+      }
+
+      .dashboard-kpi-v7 {
+        min-height:94px;
+        padding:11px;
+      }
+
+      .dashboard-kpi-icon {
+        display:none;
+      }
+
+      .dashboard-kpi-v7 strong {
+        font-size:19px;
+      }
+    }
+
+
+    /* V8 FINAL DASHBOARD */
+    @media (max-width: 820px) {
+      .mobile-topbar {
+        min-height:58px;
+        padding:calc(8px + env(safe-area-inset-top)) 12px 8px;
+        background:linear-gradient(180deg,rgba(7,7,7,.98),rgba(12,12,12,.96));
+      }
+
+      .mobile-brand {
+        font-size:12px;
+        letter-spacing:4px;
+      }
+
+      .mobile-page-title strong {
+        font-size:14px;
+      }
+
+      .mobile-page-title small {
+        font-size:8px;
+        opacity:.65;
+      }
+
+      .mobile-logout {
+        min-height:34px;
+        padding:7px 9px;
+        font-size:10px;
+      }
+
+      .main {
+        padding-top:14px;
+      }
+
+      .hero-search-row {
+        margin-bottom:10px;
+      }
+
+      .hero-search-row input {
+        min-height:46px;
+        border-radius:11px;
+        font-size:13px;
+      }
+
+      .dashboard-periods-v7 {
+        margin-bottom:12px;
+      }
+
+      .dashboard-periods-v7 button {
+        padding:7px 12px;
+        font-size:10px;
+        border-radius:9px;
+      }
+
+      .dashboard-kpis-v7 {
+        gap:8px;
+        margin-bottom:10px;
+      }
+
+      .dashboard-kpi-v7 {
+        min-height:86px;
+        padding:11px;
+        border-radius:12px;
+      }
+
+      .dashboard-kpi-icon {
+        width:38px;
+        height:38px;
+        flex-basis:38px;
+        font-size:18px;
+        border-radius:10px;
+      }
+
+      .dashboard-kpi-v7 small {
+        font-size:8px;
+        margin-bottom:3px;
+      }
+
+      .dashboard-kpi-v7 strong {
+        font-size:18px;
+      }
+
+      .dashboard-kpi-v7 span {
+        font-size:8px;
+        margin-top:3px;
+      }
+
+      .dashboard-main-v7 {
+        gap:8px;
+        margin-bottom:8px;
+      }
+
+      .dashboard-chart-card-v7,
+      .dashboard-top-card-v7 {
+        border-radius:12px;
+        padding:12px;
+      }
+
+      .dashboard-card-head-v7 {
+        margin-bottom:8px;
+      }
+
+      .dashboard-card-head-v7 h3 {
+        font-size:13px;
+      }
+
+      .dashboard-card-head-v7 button {
+        font-size:9px;
+      }
+
+      .dashboard-chart-wrap-v7 {
+        min-height:220px;
+      }
+
+      .dashboard-top-item-v7 {
+        grid-template-columns:28px minmax(0,1fr) auto;
+        gap:8px;
+        padding:8px 0;
+      }
+
+      .dashboard-rank-v7 {
+        width:26px;
+        height:26px;
+        font-size:9px;
+      }
+
+      .dashboard-top-item-v7 strong {
+        font-size:11px;
+      }
+
+      .dashboard-top-item-v7 small {
+        font-size:8px;
+      }
+
+      .dashboard-top-item-v7 .amount {
+        font-size:10px;
+      }
+
+      .dashboard-secondary-v7 {
+        display:none;
+      }
+
+      .mobile-bottom-nav {
+        height:calc(66px + env(safe-area-inset-bottom));
+        padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+      }
+
+      .mobile-nav-btn {
+        font-size:8px;
+        gap:3px;
+      }
+
+      .mobile-nav-btn .mobile-icon {
+        font-size:17px;
+      }
+
+      .mobile-nav-btn.primary-mobile {
+        width:52px;
+        height:52px;
+        min-height:52px;
+        border-radius:50%;
+        margin-top:-15px;
+      }
+
+      .mobile-nav-btn.primary-mobile .mobile-icon {
+        font-size:24px;
+      }
+
+      body {
+        padding-bottom:calc(66px + env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (min-width:821px) {
+      .topbar.dashboard-minimal {
+        align-items:center;
+        padding-bottom:14px;
+        border-bottom:1px solid rgba(255,255,255,.06);
+      }
+
+      .topbar.dashboard-minimal h1 {
+        color:var(--gold);
+        letter-spacing:4px;
+        font-size:22px;
+      }
+
+      .topbar.dashboard-minimal p {
+        font-size:9px;
+        letter-spacing:2px;
+        text-transform:uppercase;
+        color:#6f6f6f;
+      }
+
+      .topbar.dashboard-minimal .dashboard-user-box {
+        display:flex;
+      }
+    }
+
+    .dashboard-user-box {
+      display:none;
+      margin-left:auto;
+      align-items:center;
+      gap:12px;
+      text-align:right;
+    }
+
+    .dashboard-user-box strong {
+      display:block;
+      color:#eee;
+      font-size:13px;
+    }
+
+    .dashboard-user-box small {
+      display:block;
+      color:#777;
+      font-size:9px;
+      margin-top:2px;
+    }
+
+    .dashboard-user-logout {
+      width:38px;
+      height:38px;
+      border-radius:11px;
+      border:1px solid #2b2b2b;
+      background:#171717;
+      color:var(--gold);
+      font-size:17px;
+      cursor:pointer;
+    }
+
   </style>
 </head>
 
@@ -2116,6 +3077,10 @@
         <button class="nav-btn" data-section="ventas">
           Ventas
         </button>
+
+        <button class="nav-btn" data-section="stock">
+          Stock & rentabilidad
+        </button>
       </nav>
 
       <div class="sidebar-bottom">
@@ -2136,13 +3101,29 @@
 
     <main class="main">
 
-      <div class="topbar">
+      <div class="topbar dashboard-minimal" id="desktopTopbar">
 
         <div>
-          <h1 id="pageTitle">Dashboard</h1>
+          <h1 id="pageTitle">NERÓS</h1>
           <p id="pageSubtitle">
-            Resumen general de NERÓS.
+            ADMIN
           </p>
+        </div>
+
+        <div class="dashboard-user-box">
+          <div>
+            <strong id="dashboardUserName">Admin</strong>
+            <small>Administrador</small>
+          </div>
+
+          <button
+            class="dashboard-user-logout"
+            id="dashboardLogoutBtn"
+            type="button"
+            title="Cerrar sesión"
+          >
+            ↪
+          </button>
         </div>
 
       </div>
@@ -2151,7 +3132,218 @@
       <!-- DASHBOARD -->
       <section id="section-dashboard" class="section active">
 
-        <div class="stats-grid stats-8">
+        <div class="hero-search-row">
+          <div class="search-box">
+            <input
+              id="buscadorGlobalV7"
+              type="text"
+              placeholder="Buscar cliente, producto o venta..."
+              autocomplete="off"
+            />
+            <div id="resultadosGlobalesV7" class="global-results hidden"></div>
+          </div>
+        </div>
+
+        <div class="dashboard-periods-v7" id="dashboardPeriodosV7">
+          <button type="button" data-periodo="hoy">Hoy</button>
+          <button type="button" data-periodo="7">7 días</button>
+          <button type="button" data-periodo="mes" class="active">Mes</button>
+          <button type="button" data-periodo="anio">Año</button>
+        </div>
+
+        <div class="dashboard-kpis-v7">
+
+          <div class="dashboard-kpi-v7">
+            <div class="dashboard-kpi-icon">$</div>
+            <div>
+              <small>Facturación</small>
+              <strong id="v7Facturacion">$0</strong>
+              <span id="v7FacturacionSub">Mes actual</span>
+            </div>
+          </div>
+
+          <div class="dashboard-kpi-v7">
+            <div class="dashboard-kpi-icon">↗</div>
+            <div>
+              <small>Ganancia</small>
+              <strong id="v7Ganancia">$0</strong>
+              <span id="v7GananciaSub">Mes actual</span>
+            </div>
+          </div>
+
+          <div class="dashboard-kpi-v7">
+            <div class="dashboard-kpi-icon">▣</div>
+            <div>
+              <small>Ventas</small>
+              <strong id="v7Ventas">0</strong>
+              <span id="v7VentasSub">Operaciones</span>
+            </div>
+          </div>
+
+          <div class="dashboard-kpi-v7">
+            <div class="dashboard-kpi-icon">◉</div>
+            <div>
+              <small>Clientes</small>
+              <strong id="v7Clientes">0</strong>
+              <span>Registrados</span>
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="dashboard-main-v7">
+
+          <div class="dashboard-chart-card-v7">
+
+            <div class="dashboard-card-head-v7">
+              <h3 id="v7ChartTitle">Ventas del mes</h3>
+
+              <button
+                type="button"
+                id="toggleAdvancedV7"
+              >
+                Ver estadísticas
+              </button>
+            </div>
+
+            <div class="dashboard-chart-wrap-v7">
+              <canvas id="chartFacturacionV7"></canvas>
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-top-card-v7">
+
+            <div class="dashboard-card-head-v7">
+              <h3>Productos más vendidos</h3>
+
+              <button
+                type="button"
+                onclick="irASeccion('productos')"
+              >
+                Ver todos
+              </button>
+            </div>
+
+            <div id="topProductosV7" class="dashboard-top-list-v7"></div>
+
+            <div id="topProductosV7Empty" class="empty hidden">
+              Todavía no hay ventas para este período.
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="dashboard-secondary-v7">
+
+          <div class="dashboard-simple-card-v7">
+            <div class="dashboard-card-head-v7">
+              <h3>Últimas ventas</h3>
+              <button type="button" onclick="irASeccion('ventas')">Ver todas</button>
+            </div>
+
+            <div id="ultimasVentasV7" class="dashboard-simple-list-v7"></div>
+
+            <div id="ultimasVentasV7Empty" class="empty hidden">
+              Todavía no hay ventas.
+            </div>
+          </div>
+
+          <div class="dashboard-simple-card-v7">
+            <div class="dashboard-card-head-v7">
+              <h3>Stock para revisar</h3>
+              <button type="button" onclick="irASeccion('stock')">Ver stock</button>
+            </div>
+
+            <div id="stockAlertasV7" class="dashboard-simple-list-v7"></div>
+
+            <div id="stockAlertasV7Empty" class="empty hidden">
+              Sin alertas de stock.
+            </div>
+          </div>
+
+        </div>
+
+
+        <div id="advancedV7" class="dashboard-advanced-v7">
+
+          <div class="dashboard-tools-v7">
+            <button class="btn btn-secondary" id="exportarVentasV7" type="button">
+              Exportar ventas CSV
+            </button>
+
+            <button class="btn btn-secondary" id="exportarClientesV7" type="button">
+              Exportar clientes CSV
+            </button>
+
+            <button class="btn btn-secondary" id="exportarProductosV7" type="button">
+              Exportar productos CSV
+            </button>
+          </div>
+
+          <div class="analytics-grid">
+
+            <div class="chart-card">
+              <h3>Ganancia por día</h3>
+              <div class="chart-wrap">
+                <canvas id="chartGananciaV7"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <h3>Medios de pago</h3>
+              <div class="chart-wrap">
+                <canvas id="chartPagosV7"></canvas>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="analytics-toolbar" style="display:none">
+
+          <div class="search-box">
+            <input
+              id="buscadorGlobal"
+              type="text"
+              placeholder="Buscar cliente, producto o venta..."
+              autocomplete="off"
+            />
+            <div id="resultadosGlobales" class="global-results hidden"></div>
+          </div>
+
+          <div class="analytics-actions">
+            <button class="btn btn-secondary" id="exportarVentasBtn" type="button">
+              Exportar ventas CSV
+            </button>
+
+            <button class="btn btn-secondary" id="exportarClientesBtn" type="button">
+              Exportar clientes CSV
+            </button>
+
+            <button class="btn btn-secondary" id="exportarProductosBtn" type="button">
+              Exportar productos CSV
+            </button>
+          </div>
+
+        </div>
+
+        <div class="analytics-periods" id="analyticsPeriodos" style="display:none">
+          <button type="button" data-periodo="hoy">Hoy</button>
+          <button type="button" data-periodo="7">7 días</button>
+          <button type="button" data-periodo="mes" class="active">Mes</button>
+          <button type="button" data-periodo="anio">Año</button>
+        </div>
+
+
+        <div class="stats-grid stats-8" style="display:none">
 
           <div class="stat-card">
             <div class="label">Ventas hoy</div>
@@ -2204,7 +3396,7 @@
         </div>
 
 
-        <div class="dashboard-grid">
+        <div class="dashboard-grid" style="display:none">
 
           <div>
 
@@ -2263,6 +3455,23 @@
 
               <div id="dashboardTopProductosEmpty" class="empty hidden">
                 Todavía no hay suficiente información.
+              </div>
+
+            </div>
+
+            <div class="panel">
+
+              <div class="panel-header">
+                <div>
+                  <div class="section-kicker">Clientes</div>
+                  <h3>Mejores clientes del mes</h3>
+                </div>
+              </div>
+
+              <div id="dashboardTopClientes" class="client-rank-grid"></div>
+
+              <div id="dashboardTopClientesEmpty" class="empty hidden">
+                Todavía no hay compras de clientes registrados.
               </div>
 
             </div>
@@ -2337,6 +3546,39 @@
 
             </div>
 
+          </div>
+
+        </div>
+
+
+        <div class="analytics-grid">
+
+          <div class="chart-card">
+            <h3>Facturación por día</h3>
+            <div class="chart-wrap">
+              <canvas id="chartFacturacion"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Ganancia por día</h3>
+            <div class="chart-wrap">
+              <canvas id="chartGanancia"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Medios de pago</h3>
+            <div class="chart-wrap">
+              <canvas id="chartPagos"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Top productos</h3>
+            <div class="chart-wrap">
+              <canvas id="chartProductos"></canvas>
+            </div>
           </div>
 
         </div>
@@ -2666,6 +3908,24 @@
 
               <div id="ventaMessage" class="message sale-status"></div>
 
+              <div id="postVentaBox" class="post-sale-box hidden">
+                <strong id="postVentaTitulo">Venta registrada</strong>
+
+                <div class="post-sale-actions">
+                  <button class="btn btn-secondary" id="postVentaImprimirBtn" type="button">
+                    Imprimir
+                  </button>
+
+                  <button class="btn btn-secondary whatsapp-btn" id="postVentaWhatsAppBtn" type="button">
+                    WhatsApp
+                  </button>
+
+                  <button class="btn btn-primary" id="postVentaNuevaBtn" type="button">
+                    Nueva venta
+                  </button>
+                </div>
+              </div>
+
             </div>
 
           </div>
@@ -2752,6 +4012,90 @@
 
       </section>
 
+
+      <!-- STOCK & RENTABILIDAD -->
+      <section id="section-stock" class="section">
+
+        <div class="profit-grid">
+          <div class="profit-card">
+            <small>Valor inventario a costo</small>
+            <strong id="stockValorCosto">$0</strong>
+            <div class="secondary">Stock × costo camionero</div>
+          </div>
+          <div class="profit-card">
+            <small>Valor inventario a venta</small>
+            <strong id="stockValorVenta">$0</strong>
+            <div class="secondary">Stock × precio efectivo</div>
+          </div>
+          <div class="profit-card">
+            <small>Ganancia potencial</small>
+            <strong id="stockGananciaPotencial">$0</strong>
+            <div class="secondary">Venta potencial - costo</div>
+          </div>
+          <div class="profit-card">
+            <small>Margen potencial</small>
+            <strong id="stockMargenPotencial">0%</strong>
+            <div class="secondary">Sobre precio de venta</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="section-kicker">Inventario</div>
+              <h3>Resumen de stock</h3>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="label">Unidades en stock</div>
+              <div class="value" id="stockUnidades">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Productos con stock</div>
+              <div class="value" id="stockProductosConStock">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Sin stock</div>
+              <div class="value" id="stockSinStock">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Stock bajo</div>
+              <div class="value" id="stockBajoTotal">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="section-kicker">Rentabilidad</div>
+              <h3>Productos y margen</h3>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Código</th>
+                  <th>Costo</th>
+                  <th>Efectivo</th>
+                  <th>Ganancia/u.</th>
+                  <th>Margen</th>
+                  <th>Stock</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="stockRentabilidadBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
     </main>
 
 
@@ -2786,6 +4130,7 @@
 
     <div class="mobile-more-menu hidden" id="mobileMoreMenu">
       <button type="button" data-more-section="ventas">Historial de ventas</button>
+      <button type="button" data-more-section="stock">Stock & rentabilidad</button>
       <button type="button" id="mobileMoreLogout">Cerrar sesión</button>
     </div>
 
@@ -3179,6 +4524,114 @@
       document.getElementById("pageSubtitle");
 
 
+    const desktopTopbar =
+      document.getElementById("desktopTopbar");
+
+    const dashboardUserName =
+      document.getElementById("dashboardUserName");
+
+    const dashboardLogoutBtn =
+      document.getElementById("dashboardLogoutBtn");
+
+
+    /* ANALYTICS */
+
+    const buscadorGlobal =
+      document.getElementById("buscadorGlobal");
+
+    const resultadosGlobales =
+      document.getElementById("resultadosGlobales");
+
+    const exportarVentasBtn =
+      document.getElementById("exportarVentasBtn");
+
+    const exportarClientesBtn =
+      document.getElementById("exportarClientesBtn");
+
+    const exportarProductosBtn =
+      document.getElementById("exportarProductosBtn");
+
+    const analyticsPeriodos =
+      document.getElementById("analyticsPeriodos");
+
+
+    const buscadorGlobalV7 =
+      document.getElementById("buscadorGlobalV7");
+
+    const resultadosGlobalesV7 =
+      document.getElementById("resultadosGlobalesV7");
+
+    const dashboardPeriodosV7 =
+      document.getElementById("dashboardPeriodosV7");
+
+    const v7Facturacion =
+      document.getElementById("v7Facturacion");
+
+    const v7Ganancia =
+      document.getElementById("v7Ganancia");
+
+    const v7Ventas =
+      document.getElementById("v7Ventas");
+
+    const v7Clientes =
+      document.getElementById("v7Clientes");
+
+    const v7FacturacionSub =
+      document.getElementById("v7FacturacionSub");
+
+    const v7GananciaSub =
+      document.getElementById("v7GananciaSub");
+
+    const v7VentasSub =
+      document.getElementById("v7VentasSub");
+
+    const v7ChartTitle =
+      document.getElementById("v7ChartTitle");
+
+    const topProductosV7 =
+      document.getElementById("topProductosV7");
+
+    const topProductosV7Empty =
+      document.getElementById("topProductosV7Empty");
+
+    const ultimasVentasV7 =
+      document.getElementById("ultimasVentasV7");
+
+    const ultimasVentasV7Empty =
+      document.getElementById("ultimasVentasV7Empty");
+
+    const stockAlertasV7 =
+      document.getElementById("stockAlertasV7");
+
+    const stockAlertasV7Empty =
+      document.getElementById("stockAlertasV7Empty");
+
+    const toggleAdvancedV7 =
+      document.getElementById("toggleAdvancedV7");
+
+    const advancedV7 =
+      document.getElementById("advancedV7");
+
+    const exportarVentasV7 =
+      document.getElementById("exportarVentasV7");
+
+    const exportarClientesV7 =
+      document.getElementById("exportarClientesV7");
+
+    const exportarProductosV7 =
+      document.getElementById("exportarProductosV7");
+
+    let chartFacturacionV7Instancia = null;
+    let chartGananciaV7Instancia = null;
+    let chartPagosV7Instancia = null;
+
+    let analyticsPeriodoActual = "mes";
+    let chartFacturacionInstancia = null;
+    let chartGananciaInstancia = null;
+    let chartPagosInstancia = null;
+    let chartProductosInstancia = null;
+
+
     const mobilePageTitle =
       document.getElementById("mobilePageTitle");
 
@@ -3358,8 +4811,25 @@
     const ventaMessage =
       document.getElementById("ventaMessage");
 
+    const postVentaBox =
+      document.getElementById("postVentaBox");
+
+    const postVentaTitulo =
+      document.getElementById("postVentaTitulo");
+
+    const postVentaImprimirBtn =
+      document.getElementById("postVentaImprimirBtn");
+
+    const postVentaWhatsAppBtn =
+      document.getElementById("postVentaWhatsAppBtn");
+
+    const postVentaNuevaBtn =
+      document.getElementById("postVentaNuevaBtn");
+
     let ventaCliente = null;
     let ventaCarrito = [];
+    let ultimaVentaRegistradaId = null;
+    let ultimaVentaCliente = null;
 
 
     /* HISTORIAL DE VENTAS */
@@ -3400,6 +4870,36 @@
     let ventasCache = [];
 
 
+    /* STOCK & RENTABILIDAD */
+
+    const stockValorCosto =
+      document.getElementById("stockValorCosto");
+
+    const stockValorVenta =
+      document.getElementById("stockValorVenta");
+
+    const stockGananciaPotencial =
+      document.getElementById("stockGananciaPotencial");
+
+    const stockMargenPotencial =
+      document.getElementById("stockMargenPotencial");
+
+    const stockUnidades =
+      document.getElementById("stockUnidades");
+
+    const stockProductosConStock =
+      document.getElementById("stockProductosConStock");
+
+    const stockSinStock =
+      document.getElementById("stockSinStock");
+
+    const stockBajoTotal =
+      document.getElementById("stockBajoTotal");
+
+    const stockRentabilidadBody =
+      document.getElementById("stockRentabilidadBody");
+
+
     /* DASHBOARD V2 */
 
     const dashboardUltimasVentas =
@@ -3419,6 +4919,13 @@
 
     const dashboardStockBajoEmpty =
       document.getElementById("dashboardStockBajoEmpty");
+
+
+    const dashboardTopClientes =
+      document.getElementById("dashboardTopClientes");
+
+    const dashboardTopClientesEmpty =
+      document.getElementById("dashboardTopClientesEmpty");
 
 
     /* FICHA CLIENTE */
@@ -3627,6 +5134,20 @@
         mobilePageTitle.textContent = "Dashboard";
       }
 
+      if (desktopTopbar) {
+        desktopTopbar.classList.add("dashboard-minimal");
+      }
+
+      pageTitle.textContent = "NERÓS";
+      pageSubtitle.textContent = "ADMIN";
+
+      if (dashboardUserName) {
+        dashboardUserName.textContent =
+          user?.email
+            ? user.email.split("@")[0]
+            : "Admin";
+      }
+
       await cargarDashboard();
       await cargarClientes();
       await cargarProductos();
@@ -3669,6 +5190,12 @@
         titulo: "Ventas",
         subtitulo:
           "Historial de operaciones realizadas."
+      },
+
+      stock: {
+        titulo: "Stock & rentabilidad",
+        subtitulo:
+          "Inventario, costos y márgenes."
       }
 
     };
@@ -3704,6 +5231,19 @@
 
           pageSubtitle.textContent =
             infoSecciones[section].subtitulo;
+
+
+          if (desktopTopbar) {
+            desktopTopbar.classList.toggle(
+              "dashboard-minimal",
+              section === "dashboard"
+            );
+          }
+
+          if (section === "dashboard") {
+            pageTitle.textContent = "NERÓS";
+            pageSubtitle.textContent = "ADMIN";
+          }
 
 
           if (mobilePageTitle) {
@@ -3751,11 +5291,29 @@
             await cargarVentas();
           }
 
+          if (section === "stock") {
+            await cargarStockRentabilidad();
+          }
+
         }
       );
 
     });
 
+
+
+
+    dashboardLogoutBtn.addEventListener(
+      "click",
+      async () => {
+
+        await supabaseClient.auth.signOut();
+
+        appView.classList.add("hidden");
+        loginView.classList.remove("hidden");
+        loginPassword.value = "";
+      }
+    );
 
 
     /* =========================
@@ -4242,6 +5800,118 @@
       );
 
 
+
+      /*
+        Mejores clientes del mes.
+      */
+      const rankingClientes =
+        new Map();
+
+      ventasMes.forEach(v => {
+
+        if (!v.cliente) {
+          return;
+        }
+
+        const key =
+          v.cliente.id;
+
+        if (!rankingClientes.has(key)) {
+
+          rankingClientes.set(
+            key,
+            {
+              id: key,
+              nombre:
+                `${v.cliente.nombre || ""} ${v.cliente.apellido || ""}`.trim()
+                || `Cliente #${key}`,
+
+              compras: 0,
+              total: 0
+            }
+          );
+        }
+
+        const item =
+          rankingClientes.get(key);
+
+        item.compras += 1;
+        item.total +=
+          numeroProducto(v.total);
+      });
+
+
+      const topClientes =
+        [...rankingClientes.values()]
+          .sort(
+            (a,b) =>
+              b.total - a.total
+          )
+          .slice(0, 6);
+
+
+      dashboardTopClientes.innerHTML = "";
+
+      dashboardTopClientesEmpty.classList.toggle(
+        "hidden",
+        topClientes.length !== 0
+      );
+
+
+      topClientes.forEach(
+        (item, index) => {
+
+          const div =
+            document.createElement("div");
+
+          div.className =
+            "client-rank-item";
+
+          const vip =
+            item.compras >= 3 ||
+            item.total >= 300000;
+
+          div.innerHTML = `
+            <div>
+              <strong>
+                ${index + 1}. ${escapeHtml(item.nombre)}
+                ${
+                  vip
+                    ? '<span class="vip-badge gold">VIP</span>'
+                    : ""
+                }
+              </strong>
+
+              <small>
+                ${item.compras} compra${item.compras === 1 ? "" : "s"}
+              </small>
+            </div>
+
+            <div class="amount">
+              ${formatoDinero(item.total)}
+            </div>
+          `;
+
+          div.addEventListener(
+            "click",
+            () => {
+
+              const cliente =
+                clientesCache.find(
+                  c => c.id === item.id
+                );
+
+              if (cliente) {
+                verFichaCliente(cliente.id);
+              }
+            }
+          );
+
+          dashboardTopClientes.appendChild(div);
+        }
+      );
+
+
       /*
         Alertas de stock: primero los negativos/cero.
       */
@@ -4297,7 +5967,265 @@
 
         dashboardStockBajo.appendChild(div);
       });
+
+      await renderAnalyticsDashboard();
+      await renderDashboardV7();
     }
+
+
+
+    /* =========================
+       CLIENTES PRO / WHATSAPP
+    ========================= */
+
+    function normalizarTelefonoWhatsApp(telefono) {
+
+      let limpio =
+        String(telefono || "")
+          .replace(/\D/g, "");
+
+      if (!limpio) {
+        return "";
+      }
+
+      /*
+        Si parece número argentino local y no trae país,
+        anteponemos 54. No agregamos el 9 automáticamente
+        porque puede variar según cómo esté cargado el número.
+      */
+      if (
+        !limpio.startsWith("54") &&
+        limpio.length >= 8 &&
+        limpio.length <= 11
+      ) {
+        limpio = "54" + limpio;
+      }
+
+      return limpio;
+    }
+
+
+    function abrirWhatsAppNumero(
+      telefono,
+      mensaje = ""
+    ) {
+
+      const numero =
+        normalizarTelefonoWhatsApp(
+          telefono
+        );
+
+      if (!numero) {
+
+        alert(
+          "Este cliente no tiene un teléfono cargado."
+        );
+
+        return;
+      }
+
+      const url =
+        `https://wa.me/${numero}` +
+        (
+          mensaje
+            ? `?text=${encodeURIComponent(mensaje)}`
+            : ""
+        );
+
+      window.open(
+        url,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+
+
+    window.abrirWhatsAppCliente =
+      function(id) {
+
+        const cliente =
+          clientesCache.find(
+            c => c.id === id
+          );
+
+        if (!cliente) {
+          return;
+        }
+
+        const nombre =
+          `${cliente.nombre || ""} ${cliente.apellido || ""}`.trim();
+
+        abrirWhatsAppNumero(
+          cliente.telefono,
+          `Hola ${nombre || ""} 👋 Somos NERÓS. ¿Cómo estás?`
+        );
+      };
+
+
+    async function obtenerResumenCliente(id) {
+
+      const { data: ventas, error } =
+        await supabaseClient
+          .from("ventas")
+          .select(`
+            id,
+            created_at,
+            total,
+            medio_pago,
+            estado
+          `)
+          .eq("cliente_id", id)
+          .order(
+            "created_at",
+            { ascending: false }
+          );
+
+      if (error) {
+        throw error;
+      }
+
+      const completadas =
+        (ventas || []).filter(
+          v => v.estado !== "anulada"
+        );
+
+      const totalGastado =
+        completadas.reduce(
+          (acc,v) =>
+            acc + numeroProducto(v.total),
+          0
+        );
+
+      const ticket =
+        completadas.length
+          ? totalGastado / completadas.length
+          : 0;
+
+      return {
+        ventas: ventas || [],
+        completadas,
+        totalGastado,
+        ticket,
+        ultimaCompra:
+          completadas.length
+            ? completadas[0].created_at
+            : null,
+        vip:
+          completadas.length >= 3 ||
+          totalGastado >= 300000
+      };
+    }
+
+
+    async function mensajePostVenta(
+      ventaId,
+      cliente
+    ) {
+
+      const venta =
+        ventasCache.find(
+          v => v.id === ventaId
+        );
+
+      let ventaActual =
+        venta;
+
+      if (!ventaActual) {
+        await cargarVentas();
+        ventaActual =
+          ventasCache.find(
+            v => v.id === ventaId
+          );
+      }
+
+      const nombre =
+        cliente
+          ? `${cliente.nombre || ""} ${cliente.apellido || ""}`.trim()
+          : "";
+
+      return (
+        `Hola ${nombre || ""} 👋\n\n` +
+        `¡Gracias por tu compra en NERÓS! ✨\n` +
+        `Venta #${ventaId}\n` +
+        `Total: ${formatoDinero(ventaActual?.total || 0)}\n\n` +
+        `Hacé de tu aroma tu sello personal.`
+      );
+    }
+
+
+    postVentaImprimirBtn.addEventListener(
+      "click",
+      () => {
+
+        if (ultimaVentaRegistradaId) {
+          imprimirComprobanteVenta(
+            ultimaVentaRegistradaId
+          );
+        }
+      }
+    );
+
+
+    postVentaWhatsAppBtn.addEventListener(
+      "click",
+      async () => {
+
+        if (!ultimaVentaRegistradaId) {
+          return;
+        }
+
+        if (
+          !ultimaVentaCliente ||
+          !ultimaVentaCliente.telefono
+        ) {
+
+          alert(
+            "Esta venta no tiene un cliente con teléfono cargado."
+          );
+
+          return;
+        }
+
+        const mensaje =
+          await mensajePostVenta(
+            ultimaVentaRegistradaId,
+            ultimaVentaCliente
+          );
+
+        abrirWhatsAppNumero(
+          ultimaVentaCliente.telefono,
+          mensaje
+        );
+      }
+    );
+
+
+    postVentaNuevaBtn.addEventListener(
+      "click",
+      () => {
+
+        postVentaBox.classList.add(
+          "hidden"
+        );
+
+        ventaCliente = null;
+        ventaCarrito = [];
+
+        ventaBuscarCliente.value = "";
+        ventaBuscarProducto.value = "";
+        ventaDescuentoGeneral.value = "0";
+        ventaNotas.value = "";
+        ventaNumeroComprobante.value = "";
+
+        renderVentaClienteSeleccionado();
+        renderVentaCarrito();
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+      }
+    );
 
 
     /* =========================
@@ -4413,6 +6341,19 @@
               >
                 Ver ficha
               </button>
+
+              ${
+                cliente.telefono
+                  ? `
+                    <button
+                      class="icon-btn whatsapp-btn"
+                      onclick="abrirWhatsAppCliente(${cliente.id})"
+                    >
+                      WhatsApp
+                    </button>
+                  `
+                  : ""
+              }
 
               <button
                 class="icon-btn"
@@ -4727,6 +6668,17 @@
             : "Sin compras";
 
 
+        const ticketPromedioCliente =
+          completadas.length
+            ? totalGastado / completadas.length
+            : 0;
+
+
+        const esVip =
+          completadas.length >= 3 ||
+          totalGastado >= 300000;
+
+
         const filas =
           (ventas || [])
             .slice(0, 20)
@@ -4757,6 +6709,54 @@
 
         clienteFichaContenido.innerHTML = `
 
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+            ${
+              esVip
+                ? '<span class="vip-badge gold">★ CLIENTE VIP</span>'
+                : '<span class="vip-badge">CLIENTE</span>'
+            }
+
+            ${
+              cliente.telefono
+                ? `
+                  <button
+                    class="btn btn-secondary whatsapp-btn"
+                    type="button"
+                    onclick="abrirWhatsAppCliente(${cliente.id})"
+                  >
+                    WhatsApp
+                  </button>
+                `
+                : ""
+            }
+          </div>
+
+
+          <div class="client-insights">
+
+            <div class="client-insight">
+              <small>Compras</small>
+              <strong>${completadas.length}</strong>
+            </div>
+
+            <div class="client-insight">
+              <small>Total gastado</small>
+              <strong class="positive">${formatoDinero(totalGastado)}</strong>
+            </div>
+
+            <div class="client-insight">
+              <small>Ticket promedio</small>
+              <strong>${formatoDinero(ticketPromedioCliente)}</strong>
+            </div>
+
+            <div class="client-insight">
+              <small>Última compra</small>
+              <strong>${escapeHtml(ultimaCompra)}</strong>
+            </div>
+
+          </div>
+
+
           <div class="detail-profile">
 
             <div class="profile-box">
@@ -4772,21 +6772,6 @@
             <div class="profile-box">
               <small>Email</small>
               <strong>${escapeHtml(cliente.email || "—")}</strong>
-            </div>
-
-            <div class="profile-box">
-              <small>Compras completadas</small>
-              <strong>${completadas.length}</strong>
-            </div>
-
-            <div class="profile-box">
-              <small>Total gastado</small>
-              <strong class="positive">${formatoDinero(totalGastado)}</strong>
-            </div>
-
-            <div class="profile-box">
-              <small>Última compra</small>
-              <strong>${escapeHtml(ultimaCompra)}</strong>
             </div>
 
           </div>
@@ -5631,6 +7616,14 @@
         await cargarProductos();
         await cargarDashboard();
 
+        if (
+          document
+            .getElementById("section-stock")
+            .classList.contains("active")
+        ) {
+          await cargarStockRentabilidad();
+        }
+
 
         setTimeout(
           cerrarModalStock,
@@ -5844,6 +7837,10 @@
     ========================= */
 
     async function prepararNuevaVenta() {
+
+      if (postVentaBox) {
+        postVentaBox.classList.add("hidden");
+      }
 
       if (!clientesCache.length) {
         await cargarClientes();
@@ -6626,6 +8623,25 @@
       }
 
 
+      ultimaVentaRegistradaId =
+        ventaId;
+
+      ultimaVentaCliente =
+        ventaCliente;
+
+      postVentaTitulo.textContent =
+        `Venta #${ventaId} registrada correctamente`;
+
+      postVentaBox.classList.remove(
+        "hidden"
+      );
+
+      postVentaWhatsAppBtn.classList.toggle(
+        "hidden",
+        !ultimaVentaCliente?.telefono
+      );
+
+
       ventaCarrito = [];
       ventaCliente = null;
 
@@ -6871,6 +8887,20 @@
               >
                 Imprimir
               </button>
+
+              ${
+                venta.cliente?.telefono
+                  ? `
+                    <button
+                      class="icon-btn whatsapp-btn"
+                      type="button"
+                      onclick="enviarVentaWhatsApp(${venta.id})"
+                    >
+                      WhatsApp
+                    </button>
+                  `
+                  : ""
+              }
 
               ${
                 venta.estado !== "anulada"
@@ -7191,6 +9221,49 @@
       function() {
 
         ventaDetalleModal.classList.add("hidden");
+      };
+
+
+
+    window.enviarVentaWhatsApp =
+      async function(id) {
+
+        let venta =
+          ventasCache.find(
+            v => v.id === id
+          );
+
+        if (!venta) {
+          await cargarVentas();
+          venta =
+            ventasCache.find(
+              v => v.id === id
+            );
+        }
+
+        if (
+          !venta ||
+          !venta.cliente ||
+          !venta.cliente.telefono
+        ) {
+
+          alert(
+            "Esta venta no tiene un cliente con teléfono cargado."
+          );
+
+          return;
+        }
+
+        const mensaje =
+          await mensajePostVenta(
+            id,
+            venta.cliente
+          );
+
+        abrirWhatsAppNumero(
+          venta.cliente.telefono,
+          mensaje
+        );
       };
 
 
@@ -7990,6 +10063,1699 @@
         ventana.focus();
       };
 
+
+
+    /* =========================
+       STOCK & RENTABILIDAD
+       Sin cambios de estructura en Supabase
+    ========================= */
+
+    function costoInventarioProducto(producto) {
+
+      const costoCamionero =
+        numeroProducto(producto.costo_camionero);
+
+      return costoCamionero > 0
+        ? costoCamionero
+        : numeroProducto(producto.costo);
+    }
+
+
+    function precioInventarioProducto(producto) {
+
+      const efectivo =
+        numeroProducto(producto.precio_efectivo);
+
+      return efectivo > 0
+        ? efectivo
+        : numeroProducto(producto.precio);
+    }
+
+
+    async function cargarStockRentabilidad() {
+
+      if (!productosCache.length) {
+        await cargarProductos();
+      }
+
+      const activos =
+        productosCache.filter(
+          p => p.activo !== false
+        );
+
+      let unidades = 0;
+      let conStock = 0;
+      let sinStock = 0;
+      let bajo = 0;
+      let valorCosto = 0;
+      let valorVenta = 0;
+
+      activos.forEach(p => {
+
+        const stock =
+          numeroProducto(p.stock);
+
+        const minimo =
+          numeroProducto(p.stock_minimo);
+
+        const costo =
+          costoInventarioProducto(p);
+
+        const venta =
+          precioInventarioProducto(p);
+
+        unidades += stock;
+
+        if (stock > 0) {
+          conStock += 1;
+          valorCosto += stock * costo;
+          valorVenta += stock * venta;
+        } else {
+          sinStock += 1;
+        }
+
+        if (stock <= minimo) {
+          bajo += 1;
+        }
+      });
+
+      const ganancia =
+        valorVenta - valorCosto;
+
+      const margen =
+        valorVenta > 0
+          ? (ganancia / valorVenta) * 100
+          : 0;
+
+      stockValorCosto.textContent =
+        formatoDinero(valorCosto);
+
+      stockValorVenta.textContent =
+        formatoDinero(valorVenta);
+
+      stockGananciaPotencial.textContent =
+        formatoDinero(ganancia);
+
+      stockMargenPotencial.textContent =
+        `${margen.toLocaleString("es-AR", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1
+        })}%`;
+
+      stockUnidades.textContent =
+        unidades.toLocaleString("es-AR");
+
+      stockProductosConStock.textContent =
+        conStock.toLocaleString("es-AR");
+
+      stockSinStock.textContent =
+        sinStock.toLocaleString("es-AR");
+
+      stockBajoTotal.textContent =
+        bajo.toLocaleString("es-AR");
+
+      renderStockRentabilidad();
+    }
+
+
+    function renderStockRentabilidad() {
+
+      stockRentabilidadBody.innerHTML = "";
+
+      const lista =
+        productosCache
+          .filter(
+            p => p.activo !== false
+          )
+          .map(p => {
+
+            const costo =
+              costoInventarioProducto(p);
+
+            const venta =
+              precioInventarioProducto(p);
+
+            const ganancia =
+              venta - costo;
+
+            const margen =
+              venta > 0
+                ? (ganancia / venta) * 100
+                : 0;
+
+            return {
+              ...p,
+              costo_calc: costo,
+              venta_calc: venta,
+              ganancia_calc: ganancia,
+              margen_calc: margen
+            };
+          })
+          .sort((a, b) => {
+
+            const sa =
+              numeroProducto(a.stock);
+
+            const sb =
+              numeroProducto(b.stock);
+
+            if (sa !== sb) {
+              return sa - sb;
+            }
+
+            return b.margen_calc -
+              a.margen_calc;
+          });
+
+      lista.forEach(p => {
+
+        const stock =
+          numeroProducto(p.stock);
+
+        const minimo =
+          numeroProducto(p.stock_minimo);
+
+        const tr =
+          document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>
+            <strong>${escapeHtml(p.nombre || "Producto")}</strong>
+          </td>
+
+          <td>${escapeHtml(p.codigo || "—")}</td>
+
+          <td>${formatoDinero(p.costo_calc)}</td>
+
+          <td>${formatoDinero(p.venta_calc)}</td>
+
+          <td>
+            <strong class="${p.ganancia_calc >= 0 ? "positive" : "negative"}">
+              ${formatoDinero(p.ganancia_calc)}
+            </strong>
+          </td>
+
+          <td>
+            <span class="profit-badge ${p.margen_calc >= 0 ? "" : "negative"}">
+              ${p.margen_calc.toLocaleString("es-AR", {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+              })}%
+            </span>
+          </td>
+
+          <td>
+            <span class="stock-badge ${
+              stock <= 0
+                ? "out"
+                : stock <= minimo
+                  ? "low"
+                  : "ok"
+            }">
+              ${stock}
+            </span>
+          </td>
+
+          <td>
+            <button
+              class="icon-btn"
+              type="button"
+              onclick="ajustarStockProducto(${p.id})"
+            >
+              Ajustar
+            </button>
+          </td>
+        `;
+
+        stockRentabilidadBody.appendChild(tr);
+      });
+    }
+
+
+
+    /* =========================
+       ANALYTICS / EXPORT / SEARCH
+    ========================= */
+
+    function rangoAnalytics(periodo) {
+
+      const ahora = new Date();
+
+      if (periodo === "hoy") {
+        return new Date(
+          ahora.getFullYear(),
+          ahora.getMonth(),
+          ahora.getDate()
+        );
+      }
+
+      if (periodo === "7") {
+        const d = new Date(ahora);
+        d.setDate(d.getDate() - 6);
+        d.setHours(0,0,0,0);
+        return d;
+      }
+
+      if (periodo === "anio") {
+        return new Date(
+          ahora.getFullYear(),
+          0,
+          1
+        );
+      }
+
+      return new Date(
+        ahora.getFullYear(),
+        ahora.getMonth(),
+        1
+      );
+    }
+
+
+    async function renderAnalyticsDashboard() {
+
+      if (typeof Chart === "undefined") {
+        return;
+      }
+
+      const desde =
+        rangoAnalytics(
+          analyticsPeriodoActual
+        );
+
+      const { data: ventas, error } =
+        await supabaseClient
+          .from("ventas")
+          .select(`
+            id,
+            created_at,
+            total,
+            medio_pago,
+            estado
+          `)
+          .gte(
+            "created_at",
+            desde.toISOString()
+          )
+          .order(
+            "created_at",
+            { ascending: true }
+          );
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const completadas =
+        (ventas || []).filter(
+          v => v.estado !== "anulada"
+        );
+
+      const ids =
+        completadas.map(v => v.id);
+
+      let detalles = [];
+
+      if (ids.length) {
+
+        for (let i = 0; i < ids.length; i += 300) {
+
+          const lote =
+            ids.slice(i, i + 300);
+
+          const { data } =
+            await supabaseClient
+              .from("detalle_ventas")
+              .select(`
+                venta_id,
+                producto_id,
+                cantidad,
+                costo_unitario,
+                subtotal,
+                producto:productos (
+                  nombre
+                )
+              `)
+              .in(
+                "venta_id",
+                lote
+              );
+
+          if (data) {
+            detalles =
+              detalles.concat(data);
+          }
+        }
+      }
+
+      const porDia = new Map();
+      const pagos = new Map();
+      const productos = new Map();
+
+      completadas.forEach(v => {
+
+        const d =
+          new Date(v.created_at);
+
+        const key =
+          d.toLocaleDateString(
+            "es-AR",
+            { day:"2-digit", month:"2-digit" }
+          );
+
+        if (!porDia.has(key)) {
+          porDia.set(
+            key,
+            {
+              facturacion: 0,
+              ganancia: 0
+            }
+          );
+        }
+
+        porDia.get(key).facturacion +=
+          numeroProducto(v.total);
+
+        pagos.set(
+          v.medio_pago || "Otro",
+          (pagos.get(v.medio_pago || "Otro") || 0) +
+          numeroProducto(v.total)
+        );
+      });
+
+      detalles.forEach(d => {
+
+        const venta =
+          completadas.find(
+            v => v.id === d.venta_id
+          );
+
+        if (venta) {
+
+          const fecha =
+            new Date(venta.created_at)
+              .toLocaleDateString(
+                "es-AR",
+                { day:"2-digit", month:"2-digit" }
+              );
+
+          const g =
+            numeroProducto(d.subtotal) -
+            numeroProducto(d.costo_unitario) *
+            numeroProducto(d.cantidad);
+
+          if (porDia.has(fecha)) {
+            porDia.get(fecha).ganancia += g;
+          }
+        }
+
+        const nombre =
+          d.producto?.nombre ||
+          "Producto";
+
+        productos.set(
+          nombre,
+          (productos.get(nombre) || 0) +
+          numeroProducto(d.cantidad)
+        );
+      });
+
+      const labels =
+        [...porDia.keys()];
+
+      const fact =
+        labels.map(
+          k => porDia.get(k).facturacion
+        );
+
+      const gan =
+        labels.map(
+          k => porDia.get(k).ganancia
+        );
+
+      const topProductos =
+        [...productos.entries()]
+          .sort(
+            (a,b) => b[1] - a[1]
+          )
+          .slice(0, 8);
+
+      const chartBaseOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: "#aaa"
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "#777"
+            },
+            grid: {
+              color: "rgba(255,255,255,.05)"
+            }
+          },
+          y: {
+            ticks: {
+              color: "#777"
+            },
+            grid: {
+              color: "rgba(255,255,255,.05)"
+            }
+          }
+        }
+      };
+
+      if (chartFacturacionInstancia) {
+        chartFacturacionInstancia.destroy();
+      }
+
+      chartFacturacionInstancia =
+        new Chart(
+          document.getElementById("chartFacturacion"),
+          {
+            type: "line",
+            data: {
+              labels,
+              datasets: [{
+                label: "Facturación",
+                data: fact,
+                tension: .25
+              }]
+            },
+            options: chartBaseOptions
+          }
+        );
+
+
+      if (chartGananciaInstancia) {
+        chartGananciaInstancia.destroy();
+      }
+
+      chartGananciaInstancia =
+        new Chart(
+          document.getElementById("chartGanancia"),
+          {
+            type: "bar",
+            data: {
+              labels,
+              datasets: [{
+                label: "Ganancia",
+                data: gan
+              }]
+            },
+            options: chartBaseOptions
+          }
+        );
+
+
+      if (chartPagosInstancia) {
+        chartPagosInstancia.destroy();
+      }
+
+      chartPagosInstancia =
+        new Chart(
+          document.getElementById("chartPagos"),
+          {
+            type: "doughnut",
+            data: {
+              labels: [...pagos.keys()],
+              datasets: [{
+                data: [...pagos.values()]
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  labels: {
+                    color: "#aaa"
+                  }
+                }
+              }
+            }
+          }
+        );
+
+
+      if (chartProductosInstancia) {
+        chartProductosInstancia.destroy();
+      }
+
+      chartProductosInstancia =
+        new Chart(
+          document.getElementById("chartProductos"),
+          {
+            type: "bar",
+            data: {
+              labels:
+                topProductos.map(
+                  x => x[0]
+                ),
+              datasets: [{
+                label: "Unidades",
+                data:
+                  topProductos.map(
+                    x => x[1]
+                  )
+              }]
+            },
+            options: {
+              ...chartBaseOptions,
+              indexAxis: "y"
+            }
+          }
+        );
+    }
+
+
+    analyticsPeriodos
+      .querySelectorAll("button")
+      .forEach(btn => {
+
+        btn.addEventListener(
+          "click",
+          async () => {
+
+            analyticsPeriodos
+              .querySelectorAll("button")
+              .forEach(
+                b => b.classList.remove("active")
+              );
+
+            btn.classList.add("active");
+
+            analyticsPeriodoActual =
+              btn.dataset.periodo;
+
+            await renderAnalyticsDashboard();
+          }
+        );
+      });
+
+
+    buscadorGlobal.addEventListener(
+      "input",
+      () => {
+
+        const q =
+          buscadorGlobal.value
+            .toLowerCase()
+            .trim();
+
+        resultadosGlobales.innerHTML = "";
+
+        if (!q) {
+          resultadosGlobales.classList.add("hidden");
+          return;
+        }
+
+        const resultados = [];
+
+        clientesCache
+          .filter(c => {
+            const t = `
+              ${c.nombre || ""}
+              ${c.apellido || ""}
+              ${c.dni || ""}
+              ${c.telefono || ""}
+            `.toLowerCase();
+
+            return t.includes(q);
+          })
+          .slice(0,5)
+          .forEach(c => {
+
+            resultados.push({
+              tipo: "Cliente",
+              titulo:
+                `${c.nombre || ""} ${c.apellido || ""}`.trim(),
+              detalle:
+                c.telefono || c.dni || "",
+              accion: () =>
+                verFichaCliente(c.id)
+            });
+          });
+
+        productosCache
+          .filter(p => {
+            const t = `
+              ${p.nombre || ""}
+              ${p.codigo || ""}
+              ${p.marca || ""}
+            `.toLowerCase();
+
+            return t.includes(q);
+          })
+          .slice(0,5)
+          .forEach(p => {
+
+            resultados.push({
+              tipo: "Producto",
+              titulo:
+                p.nombre || "Producto",
+              detalle:
+                `${p.codigo || ""} · Stock ${numeroProducto(p.stock)}`,
+              accion: () => {
+                irASeccion("productos");
+                buscarProducto.value =
+                  p.nombre || "";
+                aplicarFiltrosProductos();
+              }
+            });
+          });
+
+        ventasCache
+          .filter(v => {
+            const t = `
+              ${v.id}
+              ${nombreClienteHistorial(v)}
+              ${v.medio_pago || ""}
+            `.toLowerCase();
+
+            return t.includes(q);
+          })
+          .slice(0,5)
+          .forEach(v => {
+
+            resultados.push({
+              tipo: "Venta",
+              titulo:
+                `Venta #${v.id}`,
+              detalle:
+                `${nombreClienteHistorial(v)} · ${formatoDinero(v.total)}`,
+              accion: () =>
+                verDetalleVenta(v.id)
+            });
+          });
+
+        if (!resultados.length) {
+          resultadosGlobales.innerHTML =
+            '<div style="padding:12px;color:#777">Sin resultados.</div>';
+          resultadosGlobales.classList.remove("hidden");
+          return;
+        }
+
+        resultados.forEach(r => {
+
+          const div =
+            document.createElement("div");
+
+          div.className =
+            "global-result-item";
+
+          div.innerHTML = `
+            <div>
+              <strong>${escapeHtml(r.titulo)}</strong>
+              <small>${escapeHtml(r.detalle || "")}</small>
+            </div>
+            <span class="global-tag">
+              ${escapeHtml(r.tipo)}
+            </span>
+          `;
+
+          div.addEventListener(
+            "click",
+            () => {
+
+              resultadosGlobales.classList.add("hidden");
+              buscadorGlobal.value = "";
+              r.accion();
+            }
+          );
+
+          resultadosGlobales.appendChild(div);
+        });
+
+        resultadosGlobales.classList.remove("hidden");
+      }
+    );
+
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        if (
+          resultadosGlobales &&
+          !resultadosGlobales.contains(event.target) &&
+          event.target !== buscadorGlobal
+        ) {
+          resultadosGlobales.classList.add("hidden");
+        }
+      }
+    );
+
+
+    function csvEscape(valor) {
+
+      const s =
+        String(valor ?? "");
+
+      if (
+        s.includes(",") ||
+        s.includes('"') ||
+        s.includes("\n")
+      ) {
+        return `"${s.replaceAll('"','""')}"`;
+      }
+
+      return s;
+    }
+
+
+    function descargarCsv(nombre, headers, filas) {
+
+      const contenido = [
+        headers.join(","),
+        ...filas.map(
+          fila =>
+            fila.map(csvEscape).join(",")
+        )
+      ].join("\n");
+
+      const blob =
+        new Blob(
+          ["\ufeff" + contenido],
+          { type:"text/csv;charset=utf-8" }
+        );
+
+      const url =
+        URL.createObjectURL(blob);
+
+      const a =
+        document.createElement("a");
+
+      a.href = url;
+      a.download = nombre;
+      a.click();
+
+      setTimeout(
+        () => URL.revokeObjectURL(url),
+        1000
+      );
+    }
+
+
+    exportarVentasBtn.addEventListener(
+      "click",
+      async () => {
+
+        if (!ventasCache.length) {
+          await cargarVentas();
+        }
+
+        descargarCsv(
+          "neros-ventas.csv",
+          [
+            "ID",
+            "Fecha",
+            "Cliente",
+            "Medio de pago",
+            "Subtotal",
+            "Descuento",
+            "Total",
+            "Estado",
+            "Comprobante"
+          ],
+          ventasCache.map(v => [
+            v.id,
+            formatoFechaHora(v.created_at),
+            nombreClienteHistorial(v),
+            v.medio_pago || "",
+            v.subtotal || 0,
+            v.descuento || 0,
+            v.total || 0,
+            v.estado || "",
+            [
+              v.tipo_comprobante || "",
+              v.numero_comprobante || ""
+            ].filter(Boolean).join(" ")
+          ])
+        );
+      }
+    );
+
+
+    exportarClientesBtn.addEventListener(
+      "click",
+      async () => {
+
+        if (!clientesCache.length) {
+          await cargarClientes();
+        }
+
+        descargarCsv(
+          "neros-clientes.csv",
+          [
+            "ID",
+            "Nombre",
+            "Apellido",
+            "DNI",
+            "Telefono",
+            "Email",
+            "Localidad",
+            "Provincia",
+            "CP",
+            "Fecha alta"
+          ],
+          clientesCache.map(c => [
+            c.id,
+            c.nombre || "",
+            c.apellido || "",
+            c.dni || "",
+            c.telefono || "",
+            c.email || "",
+            c.localidad || "",
+            c.provincia || "",
+            c.codigo_postal || "",
+            formatoFecha(c.created_at)
+          ])
+        );
+      }
+    );
+
+
+    exportarProductosBtn.addEventListener(
+      "click",
+      async () => {
+
+        if (!productosCache.length) {
+          await cargarProductos();
+        }
+
+        descargarCsv(
+          "neros-productos.csv",
+          [
+            "ID",
+            "Codigo",
+            "Marca",
+            "Nombre",
+            "Categoria",
+            "Presentacion",
+            "Costo",
+            "Costo camionero",
+            "Precio",
+            "Precio efectivo",
+            "Mayorista 10",
+            "Mayorista 20",
+            "Mayorista 30",
+            "Stock",
+            "Stock minimo",
+            "Activo"
+          ],
+          productosCache.map(p => [
+            p.id,
+            p.codigo || "",
+            p.marca || "",
+            p.nombre || "",
+            p.categoria || "",
+            p.presentacion || "",
+            p.costo || 0,
+            p.costo_camionero || 0,
+            p.precio || 0,
+            p.precio_efectivo || 0,
+            p.precio_mayorista_10 || 0,
+            p.precio_mayorista_20 || 0,
+            p.precio_mayorista_30 || 0,
+            p.stock || 0,
+            p.stock_minimo || 0,
+            p.activo !== false
+          ])
+        );
+      }
+    );
+
+
+
+    /* =========================
+       DASHBOARD V7
+    ========================= */
+
+    function periodoLabelV7() {
+
+      if (analyticsPeriodoActual === "hoy") {
+        return "Hoy";
+      }
+
+      if (analyticsPeriodoActual === "7") {
+        return "Últimos 7 días";
+      }
+
+      if (analyticsPeriodoActual === "anio") {
+        return "Año actual";
+      }
+
+      return "Mes actual";
+    }
+
+
+    async function renderDashboardV7() {
+
+      const desde =
+        rangoAnalytics(
+          analyticsPeriodoActual
+        );
+
+      const { data: ventas, error } =
+        await supabaseClient
+          .from("ventas")
+          .select(`
+            id,
+            created_at,
+            total,
+            medio_pago,
+            estado,
+            cliente:clientes (
+              id,
+              nombre,
+              apellido
+            )
+          `)
+          .gte(
+            "created_at",
+            desde.toISOString()
+          )
+          .order(
+            "created_at",
+            { ascending: true }
+          );
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const completadas =
+        (ventas || []).filter(
+          v => v.estado !== "anulada"
+        );
+
+      const ids =
+        completadas.map(v => v.id);
+
+      let detalles = [];
+
+      if (ids.length) {
+
+        for (
+          let i = 0;
+          i < ids.length;
+          i += 300
+        ) {
+
+          const lote =
+            ids.slice(i, i + 300);
+
+          const { data } =
+            await supabaseClient
+              .from("detalle_ventas")
+              .select(`
+                venta_id,
+                producto_id,
+                cantidad,
+                costo_unitario,
+                subtotal,
+                producto:productos (
+                  nombre
+                )
+              `)
+              .in(
+                "venta_id",
+                lote
+              );
+
+          if (data) {
+            detalles =
+              detalles.concat(data);
+          }
+        }
+      }
+
+      const facturacion =
+        completadas.reduce(
+          (acc,v) =>
+            acc +
+            numeroProducto(v.total),
+          0
+        );
+
+      const costo =
+        detalles.reduce(
+          (acc,d) =>
+            acc +
+            numeroProducto(d.costo_unitario) *
+            numeroProducto(d.cantidad),
+          0
+        );
+
+      const ganancia =
+        facturacion - costo;
+
+      v7Facturacion.textContent =
+        formatoDinero(facturacion);
+
+      v7Ganancia.textContent =
+        formatoDinero(ganancia);
+
+      v7Ventas.textContent =
+        completadas.length.toLocaleString("es-AR");
+
+      v7Clientes.textContent =
+        clientesCache.length.toLocaleString("es-AR");
+
+      const labelPeriodo =
+        periodoLabelV7();
+
+      v7FacturacionSub.textContent =
+        labelPeriodo;
+
+      v7GananciaSub.textContent =
+        labelPeriodo;
+
+      v7VentasSub.textContent =
+        `${completadas.length} operación${completadas.length === 1 ? "" : "es"}`;
+
+      v7ChartTitle.textContent =
+        analyticsPeriodoActual === "hoy"
+          ? "Ventas de hoy"
+          : analyticsPeriodoActual === "7"
+            ? "Ventas de los últimos 7 días"
+            : analyticsPeriodoActual === "anio"
+              ? "Ventas del año"
+              : "Ventas del mes";
+
+
+      /*
+        Gráfico principal.
+      */
+      const porDia =
+        new Map();
+
+      completadas.forEach(v => {
+
+        const key =
+          new Date(v.created_at)
+            .toLocaleDateString(
+              "es-AR",
+              {
+                day:"2-digit",
+                month:"2-digit"
+              }
+            );
+
+        porDia.set(
+          key,
+          (porDia.get(key) || 0) +
+          numeroProducto(v.total)
+        );
+      });
+
+      if (
+        typeof Chart !== "undefined"
+      ) {
+
+        if (chartFacturacionV7Instancia) {
+          chartFacturacionV7Instancia.destroy();
+        }
+
+        chartFacturacionV7Instancia =
+          new Chart(
+            document.getElementById("chartFacturacionV7"),
+            {
+              type:"line",
+              data:{
+                labels:[...porDia.keys()],
+                datasets:[{
+                  label:"Facturación",
+                  data:[...porDia.values()],
+                  tension:.28,
+                  fill:true
+                }]
+              },
+              options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                plugins:{
+                  legend:{
+                    display:false
+                  }
+                },
+                scales:{
+                  x:{
+                    ticks:{color:"#777"},
+                    grid:{color:"rgba(255,255,255,.04)"}
+                  },
+                  y:{
+                    ticks:{
+                      color:"#777",
+                      callback:value =>
+                        "$" +
+                        Number(value).toLocaleString("es-AR")
+                    },
+                    grid:{color:"rgba(255,255,255,.04)"}
+                  }
+                }
+              }
+            }
+          );
+      }
+
+
+      /*
+        Top productos.
+      */
+      const productosMap =
+        new Map();
+
+      detalles.forEach(d => {
+
+        const nombre =
+          d.producto?.nombre ||
+          "Producto";
+
+        if (!productosMap.has(nombre)) {
+          productosMap.set(
+            nombre,
+            {
+              unidades:0,
+              total:0
+            }
+          );
+        }
+
+        const item =
+          productosMap.get(nombre);
+
+        item.unidades +=
+          numeroProducto(d.cantidad);
+
+        item.total +=
+          numeroProducto(d.subtotal);
+      });
+
+
+      const top =
+        [...productosMap.entries()]
+          .sort(
+            (a,b) =>
+              b[1].unidades -
+              a[1].unidades
+          )
+          .slice(0,5);
+
+      topProductosV7.innerHTML = "";
+
+      topProductosV7Empty.classList.toggle(
+        "hidden",
+        top.length !== 0
+      );
+
+      top.forEach(
+        ([nombre, info], index) => {
+
+          const div =
+            document.createElement("div");
+
+          div.className =
+            "dashboard-top-item-v7";
+
+          div.innerHTML = `
+            <div class="dashboard-rank-v7">
+              ${index + 1}
+            </div>
+
+            <div>
+              <strong>${escapeHtml(nombre)}</strong>
+              <small>
+                ${info.unidades} unidad${info.unidades === 1 ? "" : "es"}
+              </small>
+            </div>
+
+            <div class="amount">
+              ${formatoDinero(info.total)}
+            </div>
+          `;
+
+          topProductosV7.appendChild(div);
+        }
+      );
+
+
+      /*
+        Últimas ventas.
+      */
+      const ultimas =
+        [...completadas]
+          .sort(
+            (a,b) =>
+              new Date(b.created_at) -
+              new Date(a.created_at)
+          )
+          .slice(0,4);
+
+      ultimasVentasV7.innerHTML = "";
+
+      ultimasVentasV7Empty.classList.toggle(
+        "hidden",
+        ultimas.length !== 0
+      );
+
+      ultimas.forEach(v => {
+
+        const cliente =
+          v.cliente
+            ? `${v.cliente.nombre || ""} ${v.cliente.apellido || ""}`.trim()
+            : "Consumidor final";
+
+        const div =
+          document.createElement("div");
+
+        div.className =
+          "dashboard-simple-item-v7";
+
+        div.innerHTML = `
+          <div>
+            <strong>#${v.id} · ${escapeHtml(cliente)}</strong>
+            <small>
+              ${formatoFechaHora(v.created_at)}
+              · ${escapeHtml(v.medio_pago || "—")}
+            </small>
+          </div>
+
+          <div class="right">
+            ${formatoDinero(v.total)}
+          </div>
+        `;
+
+        div.addEventListener(
+          "click",
+          () => verDetalleVenta(v.id)
+        );
+
+        ultimasVentasV7.appendChild(div);
+      });
+
+
+      /*
+        Stock bajo.
+      */
+      if (!productosCache.length) {
+        await cargarProductos();
+      }
+
+      const alertas =
+        productosCache
+          .filter(
+            p =>
+              p.activo !== false &&
+              numeroProducto(p.stock) <=
+              numeroProducto(p.stock_minimo)
+          )
+          .sort(
+            (a,b) =>
+              numeroProducto(a.stock) -
+              numeroProducto(b.stock)
+          )
+          .slice(0,4);
+
+      stockAlertasV7.innerHTML = "";
+
+      stockAlertasV7Empty.classList.toggle(
+        "hidden",
+        alertas.length !== 0
+      );
+
+      alertas.forEach(p => {
+
+        const div =
+          document.createElement("div");
+
+        div.className =
+          "dashboard-simple-item-v7";
+
+        div.innerHTML = `
+          <div>
+            <strong>${escapeHtml(p.nombre || "Producto")}</strong>
+            <small>${escapeHtml(p.codigo || "")}</small>
+          </div>
+
+          <div class="right ${numeroProducto(p.stock) <= 0 ? "negative" : "warning-text"}">
+            Stock ${numeroProducto(p.stock)}
+          </div>
+        `;
+
+        stockAlertasV7.appendChild(div);
+      });
+
+
+      /*
+        Analytics secundarios.
+      */
+      if (
+        typeof Chart !== "undefined"
+      ) {
+
+        const gananciasDia =
+          new Map();
+
+        detalles.forEach(d => {
+
+          const venta =
+            completadas.find(
+              v => v.id === d.venta_id
+            );
+
+          if (!venta) {
+            return;
+          }
+
+          const key =
+            new Date(venta.created_at)
+              .toLocaleDateString(
+                "es-AR",
+                {
+                  day:"2-digit",
+                  month:"2-digit"
+                }
+              );
+
+          const g =
+            numeroProducto(d.subtotal) -
+            numeroProducto(d.costo_unitario) *
+            numeroProducto(d.cantidad);
+
+          gananciasDia.set(
+            key,
+            (gananciasDia.get(key) || 0) + g
+          );
+        });
+
+
+        if (chartGananciaV7Instancia) {
+          chartGananciaV7Instancia.destroy();
+        }
+
+        chartGananciaV7Instancia =
+          new Chart(
+            document.getElementById("chartGananciaV7"),
+            {
+              type:"bar",
+              data:{
+                labels:[...gananciasDia.keys()],
+                datasets:[{
+                  label:"Ganancia",
+                  data:[...gananciasDia.values()]
+                }]
+              },
+              options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                plugins:{
+                  legend:{
+                    labels:{color:"#aaa"}
+                  }
+                },
+                scales:{
+                  x:{
+                    ticks:{color:"#777"},
+                    grid:{color:"rgba(255,255,255,.04)"}
+                  },
+                  y:{
+                    ticks:{color:"#777"},
+                    grid:{color:"rgba(255,255,255,.04)"}
+                  }
+                }
+              }
+            }
+          );
+
+
+        const pagos =
+          new Map();
+
+        completadas.forEach(v => {
+
+          const k =
+            v.medio_pago || "Otro";
+
+          pagos.set(
+            k,
+            (pagos.get(k) || 0) +
+            numeroProducto(v.total)
+          );
+        });
+
+
+        if (chartPagosV7Instancia) {
+          chartPagosV7Instancia.destroy();
+        }
+
+        chartPagosV7Instancia =
+          new Chart(
+            document.getElementById("chartPagosV7"),
+            {
+              type:"doughnut",
+              data:{
+                labels:[...pagos.keys()],
+                datasets:[{
+                  data:[...pagos.values()]
+                }]
+              },
+              options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                plugins:{
+                  legend:{
+                    labels:{color:"#aaa"}
+                  }
+                }
+              }
+            }
+          );
+      }
+    }
+
+
+    dashboardPeriodosV7
+      .querySelectorAll("button")
+      .forEach(btn => {
+
+        btn.addEventListener(
+          "click",
+          async () => {
+
+            dashboardPeriodosV7
+              .querySelectorAll("button")
+              .forEach(
+                b => b.classList.remove("active")
+              );
+
+            btn.classList.add("active");
+
+            analyticsPeriodoActual =
+              btn.dataset.periodo;
+
+            await renderDashboardV7();
+          }
+        );
+      });
+
+
+    toggleAdvancedV7.addEventListener(
+      "click",
+      () => {
+
+        advancedV7.classList.toggle(
+          "open"
+        );
+
+        toggleAdvancedV7.textContent =
+          advancedV7.classList.contains("open")
+            ? "Ocultar estadísticas"
+            : "Ver estadísticas";
+      }
+    );
+
+
+    function renderBusquedaGlobalV7() {
+
+      const q =
+        buscadorGlobalV7.value
+          .toLowerCase()
+          .trim();
+
+      resultadosGlobalesV7.innerHTML = "";
+
+      if (!q) {
+        resultadosGlobalesV7.classList.add("hidden");
+        return;
+      }
+
+      const resultados = [];
+
+      clientesCache
+        .filter(c => `
+          ${c.nombre || ""}
+          ${c.apellido || ""}
+          ${c.dni || ""}
+          ${c.telefono || ""}
+        `.toLowerCase().includes(q))
+        .slice(0,4)
+        .forEach(c => {
+
+          resultados.push({
+            tipo:"Cliente",
+            titulo:
+              `${c.nombre || ""} ${c.apellido || ""}`.trim(),
+            detalle:
+              c.telefono || c.dni || "",
+            accion:
+              () => verFichaCliente(c.id)
+          });
+        });
+
+
+      productosCache
+        .filter(p => `
+          ${p.nombre || ""}
+          ${p.codigo || ""}
+          ${p.marca || ""}
+        `.toLowerCase().includes(q))
+        .slice(0,4)
+        .forEach(p => {
+
+          resultados.push({
+            tipo:"Producto",
+            titulo:
+              p.nombre || "Producto",
+            detalle:
+              `${p.codigo || ""} · Stock ${numeroProducto(p.stock)}`,
+            accion:() => {
+
+              irASeccion("productos");
+
+              buscarProducto.value =
+                p.nombre || "";
+
+              aplicarFiltrosProductos();
+            }
+          });
+        });
+
+
+      ventasCache
+        .filter(v => `
+          ${v.id}
+          ${nombreClienteHistorial(v)}
+          ${v.medio_pago || ""}
+        `.toLowerCase().includes(q))
+        .slice(0,4)
+        .forEach(v => {
+
+          resultados.push({
+            tipo:"Venta",
+            titulo:`Venta #${v.id}`,
+            detalle:
+              `${nombreClienteHistorial(v)} · ${formatoDinero(v.total)}`,
+            accion:
+              () => verDetalleVenta(v.id)
+          });
+        });
+
+
+      if (!resultados.length) {
+
+        resultadosGlobalesV7.innerHTML =
+          '<div style="padding:12px;color:#777">Sin resultados.</div>';
+
+        resultadosGlobalesV7.classList.remove("hidden");
+
+        return;
+      }
+
+
+      resultados.forEach(r => {
+
+        const div =
+          document.createElement("div");
+
+        div.className =
+          "global-result-item";
+
+        div.innerHTML = `
+          <div>
+            <strong>${escapeHtml(r.titulo)}</strong>
+            <small>${escapeHtml(r.detalle || "")}</small>
+          </div>
+
+          <span class="global-tag">
+            ${escapeHtml(r.tipo)}
+          </span>
+        `;
+
+        div.addEventListener(
+          "click",
+          () => {
+
+            resultadosGlobalesV7.classList.add(
+              "hidden"
+            );
+
+            buscadorGlobalV7.value = "";
+
+            r.accion();
+          }
+        );
+
+        resultadosGlobalesV7.appendChild(div);
+      });
+
+      resultadosGlobalesV7.classList.remove("hidden");
+    }
+
+
+    buscadorGlobalV7.addEventListener(
+      "input",
+      renderBusquedaGlobalV7
+    );
+
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        if (
+          resultadosGlobalesV7 &&
+          !resultadosGlobalesV7.contains(event.target) &&
+          event.target !== buscadorGlobalV7
+        ) {
+          resultadosGlobalesV7.classList.add("hidden");
+        }
+      }
+    );
+
+
+    exportarVentasV7.addEventListener(
+      "click",
+      () => exportarVentasBtn.click()
+    );
+
+    exportarClientesV7.addEventListener(
+      "click",
+      () => exportarClientesBtn.click()
+    );
+
+    exportarProductosV7.addEventListener(
+      "click",
+      () => exportarProductosBtn.click()
+    );
 
     /* =========================
        NAVEGACIÓN RÁPIDA
